@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Uwing Uwi Resort Trip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    if (localStorage.getItem('uwingUwiTheme') === 'dark') document.documentElement.classList.add('dark-mode');
+  </script>
+  <style>
+    :root { color-scheme: light; }
+    html.dark-mode { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        linear-gradient(180deg, #f7f5ef 0%, #eef6f4 48%, #f8fafc 100%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body:before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(15,23,42,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+    .glass {
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.84);
+      box-shadow: 0 18px 55px rgba(15,23,42,.10);
+      backdrop-filter: blur(16px);
+    }
+    .soft { box-shadow: 0 12px 32px rgba(15,23,42,.08); }
+    .field {
+      width: 100%;
+      border-radius: 1.1rem;
+      border: 1px solid rgba(226,232,240,.92);
+      background: rgba(255,255,255,.86);
+      padding: .84rem 1rem;
+      outline: none;
+      transition: .2s ease;
+    }
+    .field:focus { border-color: rgba(99,102,241,.75); box-shadow: 0 0 0 5px rgba(99,102,241,.13); background: #fff; }
+    .btn { border-radius: 1.15rem; padding: .86rem 1.1rem; font-weight: 800; transition: .2s ease; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: scale(.98); }
+    .mini-btn { border-radius: .95rem; padding: .62rem .82rem; font-size: .84rem; font-weight: 800; transition: .2s ease; }
+    .pill { border-radius: 999px; padding: .42rem .78rem; font-size: .72rem; font-weight: 800; letter-spacing: .02em; }
+    .float-in { animation: floatIn .38s cubic-bezier(.2,.9,.2,1) both; }
+    .pulse-glow { }
+    .chart-card { position: relative; overflow: hidden; }
+    .chart-card:before {
+      content: ""; position: absolute; width: 14rem; height: 14rem; border-radius: 999px; right: -5rem; top: -6rem;
+      background: linear-gradient(135deg, rgba(20,83,45,.08), rgba(14,116,144,.08)); filter: blur(2px);
+    }
+    .item-card, .person-card { transition: transform .2s ease, box-shadow .2s ease; }
+    .item-card:hover, .person-card:hover { transform: translateY(-2px); box-shadow: 0 24px 56px rgba(15,23,42,.12); }
+    .nice-scroll::-webkit-scrollbar { width: 10px; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    @keyframes floatIn { from { opacity:0; transform: translateY(12px) scale(.985); } to { opacity:1; transform: translateY(0) scale(1); } }
+    
+
+    .loader-screen {
+      position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;
+      background:
+        linear-gradient(180deg, #f7f5ef, #eef6f4);
+      transition: opacity .65s ease, visibility .65s ease;
+    }
+    .loader-screen.hide { opacity: 0; visibility: hidden; }
+    .loader-card {
+      width: min(92vw, 440px); border-radius: 2rem; padding: 2rem;
+      background: rgba(255,255,255,.78); border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 30px 100px rgba(15,23,42,.18); backdrop-filter: blur(24px);
+      text-align: center; animation: popIn .55s cubic-bezier(.2,.9,.2,1) both;
+    }
+    .loader-orb {
+      width: 88px; height: 88px; margin: 0 auto 1rem; border-radius: 999px;
+      background: conic-gradient(from 90deg, #0f766e, #14b8a6, #f59e0b, #0f766e);
+      padding: 8px;
+      box-shadow: 0 12px 30px rgba(15,118,110,.18);
+    }
+    .loader-orb:after { content:""; display:block; width:100%; height:100%; border-radius:999px; background:white; }
+    .shimmer { position: relative; overflow: hidden; }
+    .shimmer:after { content:""; position:absolute; inset:0; transform:translateX(-120%); background:linear-gradient(90deg, transparent, rgba(255,255,255,.65), transparent); animation: shimmer 2.2s ease-in-out infinite; }
+    .toast {
+      position: fixed; right: 1rem; bottom: 1rem; z-index: 50; transform: translateY(120%); opacity: 0;
+      background: rgba(15,23,42,.92); color: white; padding: .9rem 1rem; border-radius: 1.25rem;
+      box-shadow: 0 20px 60px rgba(15,23,42,.22); transition: .28s ease; font-weight: 900;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .quick-chip { border-radius: 999px; padding: .55rem .8rem; font-size: .82rem; font-weight: 900; background: rgba(255,255,255,.78); border: 1px solid rgba(255,255,255,.9); transition: .18s ease; }
+    .quick-chip:hover { transform: translateY(-1px); background: white; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes popIn { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes shimmer { 100% { transform: translateX(120%); } }
+
+
+    /* Dark mode */
+    html.dark-mode body {
+      background:
+        linear-gradient(180deg, #0f172a 0%, #111827 55%, #0b1120 100%);
+      color: #e2e8f0;
+    }
+    html.dark-mode body:before {
+      background-image: radial-gradient(rgba(226,232,240,.07) 1px, transparent 1px);
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+    }
+    html.dark-mode .glass {
+      background: rgba(15,23,42,.72);
+      border-color: rgba(148,163,184,.22);
+      box-shadow: 0 28px 90px rgba(0,0,0,.42);
+    }
+    html.dark-mode .soft {
+      box-shadow: 12px 12px 34px rgba(0,0,0,.28), -10px -10px 30px rgba(255,255,255,.025);
+    }
+    html.dark-mode .field {
+      background: rgba(15,23,42,.72);
+      border-color: rgba(148,163,184,.28);
+      color: #e2e8f0;
+    }
+    html.dark-mode .field::placeholder { color: rgba(203,213,225,.58); }
+    html.dark-mode .field:focus {
+      background: rgba(15,23,42,.95);
+      border-color: rgba(129,140,248,.82);
+      box-shadow: 0 0 0 5px rgba(129,140,248,.18);
+    }
+    html.dark-mode .loader-screen {
+      background:
+        radial-gradient(circle at 25% 25%, rgba(129,140,248,.28), transparent 26rem),
+        radial-gradient(circle at 80% 25%, rgba(20,184,166,.17), transparent 26rem),
+        linear-gradient(135deg, #020617, #0f172a 50%, #111827);
+    }
+    html.dark-mode .loader-card {
+      background: rgba(15,23,42,.78);
+      border-color: rgba(148,163,184,.28);
+      color: #e2e8f0;
+    }
+    html.dark-mode .loader-orb:after { background: #0f172a; }
+    html.dark-mode .toast { background: rgba(248,250,252,.94); color: #020617; }
+    html.dark-mode .quick-chip {
+      background: rgba(30,41,59,.82);
+      border-color: rgba(148,163,184,.25);
+      color: #e2e8f0;
+    }
+    html.dark-mode .quick-chip:hover { background: rgba(51,65,85,.92); }
+    html.dark-mode .nice-scroll::-webkit-scrollbar-thumb { background: #475569; }
+    html.dark-mode .bg-white\/82,
+    html.dark-mode .bg-white\/85,
+    html.dark-mode .bg-white\/78,
+    html.dark-mode .bg-white\/70,
+    html.dark-mode .bg-white\/60,
+    html.dark-mode .bg-white,
+    html.dark-mode .bg-slate-50,
+    html.dark-mode .bg-slate-100,
+    html.dark-mode .bg-slate-200 {
+      background-color: rgba(30,41,59,.72) !important;
+      border-color: rgba(148,163,184,.22) !important;
+    }
+    html.dark-mode .bg-gradient-to-r.from-slate-50.to-indigo-50 {
+      background-image: linear-gradient(to right, rgba(30,41,59,.82), rgba(49,46,129,.35)) !important;
+    }
+    html.dark-mode .text-slate-950 { color: #f8fafc !important; }
+    html.dark-mode .text-slate-800 { color: #e2e8f0 !important; }
+    html.dark-mode .text-slate-700 { color: #cbd5e1 !important; }
+    html.dark-mode .text-slate-600 { color: #cbd5e1 !important; }
+    html.dark-mode .text-slate-500 { color: #64748b !important; }
+    html.dark-mode .text-slate-400 { color: #64748b !important; }
+    html.dark-mode .border-white { border-color: rgba(148,163,184,.22) !important; }
+    html.dark-mode .hover\:bg-white:hover { background-color: rgba(51,65,85,.92) !important; }
+    html.dark-mode .item-card,
+    html.dark-mode .person-card {
+      background: rgba(15,23,42,.68) !important;
+      border-color: rgba(148,163,184,.22) !important;
+    }
+    html.dark-mode select option { background: #0f172a; color: #e2e8f0; }
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      min-width: 9.4rem;
+    }
+    .theme-icon {
+      width: 1.35rem;
+      height: 1.35rem;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: rgba(255,255,255,.28);
+    }
+
+    /* Calmer, less flashy finishing touches */
+    h1, h2, h3 { letter-spacing: -0.035em; }
+    .pill { letter-spacing: 0; }
+    .btn:hover, .quick-chip:hover { transform: none; }
+    .item-card:hover, .person-card:hover { transform: none; box-shadow: 0 16px 38px rgba(15,23,42,.10); }
+    .float-in { animation-duration: .22s; }
+    .loader-card { text-align: left; }
+    .loader-orb { margin-left: 0; width: 52px; height: 52px; }
+    html.dark-mode .loader-card { text-align: left; }
+
+  </style>
+</head>
+<body class="text-slate-800">
+  <div id="loader" class="loader-screen">
+    <div class="loader-card">
+      <div class="loader-orb"></div>
+      <p class="text-xs font-black tracking-[.25em] uppercase text-teal-700">Opening trip planner</p>
+      <h2 class="text-3xl font-black text-slate-950 mt-2">Uwing Uwi Resort Trip</h2>
+      <p class="text-slate-500 mt-2 font-semibold">Loading your saved items and contributions.</p>
+      <div class="mt-5 h-3 rounded-full bg-slate-200 overflow-hidden shimmer"><div class="h-full w-2/3 rounded-full bg-teal-600"></div></div>
+    </div>
+  </div>
+  <div id="toast" class="toast">Saved</div>
+
+  <main class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <header class="glass rounded-[2.1rem] p-5 sm:p-8 mb-6 pulse-glow">
+      <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-6">
+        <div>
+          <p class="text-xs sm:text-sm font-black tracking-[.32em] uppercase text-teal-700">Trip budget</p><div class="mt-3 flex flex-wrap gap-2"><span class="pill bg-teal-100 text-teal-700">2026</span><span class="pill bg-amber-100 text-amber-700">Resort</span><span class="pill bg-slate-100 text-slate-700">Shared budget</span></div>
+          <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-slate-950 mt-2">Uwing Uwi Resort Trip</h1>
+          <p class="text-slate-500 mt-3 max-w-2xl">A simple shared budget for food, drinks, things to buy, and everyone’s contributions.</p>
+        </div>
+        <div class="grid grid-cols-2 sm:flex gap-2">
+          <button id="themeToggle" class="btn theme-toggle col-span-2 sm:col-span-1 bg-white/85 text-slate-700 border border-white hover:bg-white" type="button"><span id="themeIcon" class="theme-icon">🌙</span><span id="themeLabel">Dark</span></button>
+          <button id="sampleBtn" class="btn bg-white/85 text-slate-700 border border-white hover:bg-white">Reset</button>
+          <button id="clearBtn" class="btn bg-rose-100 text-rose-700 hover:bg-rose-200">Clear</button>
+          <button id="exportBtn" class="btn col-span-2 bg-slate-950 text-white hover:bg-slate-800">Export JSON</button>
+        </div>
+      </div>
+
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+        <article class="soft rounded-3xl bg-white/82 p-5"><p class="text-sm text-slate-500 font-bold">Total Budget</p><p id="totalBudget" class="text-3xl font-black text-slate-950 mt-1">₱0</p></article>
+        <article class="soft rounded-3xl bg-teal-700 p-5 text-white"><p class="text-sm text-white/80 font-bold">Split Per Person</p><p id="costPerPerson" class="text-3xl font-black mt-1">₱0</p></article>
+        <article class="soft rounded-3xl bg-white/82 p-5"><p class="text-sm text-slate-500 font-bold">People Count</p><p id="peopleCountCard" class="text-3xl font-black text-teal-700 mt-1">0</p></article>
+        <article class="soft rounded-3xl bg-white/82 p-5"><p class="text-sm text-slate-500 font-bold">Contributions</p><p id="totalContrib" class="text-3xl font-black text-emerald-700 mt-1">₱0</p></article>
+        <article class="soft rounded-3xl bg-white/82 p-5"><p class="text-sm text-slate-500 font-bold">Still Needed</p><p id="balanceNeeded" class="text-3xl font-black text-rose-700 mt-1">₱0</p></article>
+      </section>
+    </header>
+
+    <section class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
+      <article class="glass chart-card rounded-[2rem] p-5 xl:col-span-5 float-in">
+        <div class="relative flex items-start justify-between gap-4 mb-3">
+          <div><h2 class="text-2xl font-black text-slate-950">Expense Distribution</h2><p class="text-sm text-slate-500">Category breakdown for the trip.</p></div>
+          <span id="topCategoryBadge" class="pill bg-teal-100 text-teal-700">Top: —</span>
+        </div>
+        <div class="relative h-[320px]"><canvas id="categoryChart"></canvas></div>
+      </article>
+
+      <article class="glass chart-card rounded-[2rem] p-5 xl:col-span-5 float-in">
+        <div class="relative flex items-start justify-between gap-4 mb-3">
+          <div><h2 class="text-2xl font-black text-slate-950">Contributions</h2><p class="text-sm text-slate-500">Track payments against the current split.</p></div>
+          <span id="shareBadge" class="pill bg-emerald-100 text-emerald-700">Share: ₱0</span>
+        </div>
+        <div class="relative h-[320px]"><canvas id="personChart"></canvas></div>
+      </article>
+
+      <aside class="xl:col-span-2 space-y-4">
+        <section class="glass rounded-[2rem] p-5 float-in">
+          <h3 class="text-lg font-black text-slate-950">Split Settings</h3>
+          <p class="text-xs text-slate-500 mt-1 mb-3">Leave blank to use the number of people listed.</p>
+          <input id="manualPeople" class="field text-center text-2xl font-black" type="number" min="1" step="1" placeholder="Auto" />
+          <p id="peopleHint" class="text-xs text-slate-500 mt-3 font-bold">Auto count enabled.</p>
+        </section>
+        <section class="glass rounded-[2rem] p-5 float-in">
+          <h3 class="text-lg font-black text-slate-950">Progress</h3>
+          <div class="mt-4 h-4 rounded-full bg-slate-200 overflow-hidden"><div id="progressBar" class="h-full rounded-full bg-gradient-to-r from-teal-500 to-amber-500 transition-all duration-500" style="width:0%"></div></div>
+          <p id="progressText" class="text-sm font-black text-slate-600 mt-3">0% funded</p><p id="lastUpdated" class="mt-2 text-xs font-bold text-slate-400">Autosaved just now</p>
+        </section>
+      </aside>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <aside class="lg:col-span-4 space-y-6">
+        <section class="glass rounded-[2rem] p-5">
+          <div class="flex items-start justify-between gap-3 mb-4"><div><h2 class="text-2xl font-black text-slate-950">Add Thing to Buy</h2><p class="text-sm text-slate-500">Add something and adjust it later.</p></div><span class="pill bg-sky-100 text-sky-700">Items</span></div>
+          <form id="itemForm" class="space-y-3">
+            <input id="itemName" class="field" placeholder="Item name, e.g. Coke" required />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><select id="itemCategory" class="field"><option>Food</option><option>Drinks</option><option>Breakfast</option><option>Snacks</option><option>Ingredients</option><option>Other</option></select><input id="itemPrice" class="field" type="number" min="0" step="1" placeholder="Price" /></div>
+            <input id="itemAssigned" class="field" placeholder="Assigned person / group" value="Unassigned" />
+            <button class="btn w-full bg-teal-700 text-white hover:opacity-95">+ Add Item</button>
+          </form>
+          <div class="mt-4">
+            <p class="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Quick add ideas</p>
+            <div class="flex flex-wrap gap-2">
+              <button class="quick-chip" onclick="quickAddItem('Water gallons','Drinks',120)">Water</button>
+              <button class="quick-chip" onclick="quickAddItem('Charcoal / Uling','Other',180)">Uling</button>
+              <button class="quick-chip" onclick="quickAddItem('Paper plates & cups','Other',250)">Plates</button>
+              <button class="quick-chip" onclick="quickAddItem('Resort fee / cottage','Other',0)">Resort fee</button>
+            </div>
+          </div>
+        </section>
+        <section class="glass rounded-[2rem] p-5">
+          <div class="flex items-start justify-between gap-3 mb-4"><div><h2 class="text-2xl font-black text-slate-950">Add Contribution</h2><p class="text-sm text-slate-500">Add a person or payment.</p></div><span class="pill bg-emerald-100 text-emerald-700">Money</span></div>
+          <form id="contributionForm" class="space-y-3">
+            <input id="contribName" class="field" placeholder="Person name" required />
+            <input id="contribAmount" class="field" type="number" min="0" step="1" placeholder="Amount contributed" />
+            <button class="btn w-full bg-emerald-700 text-white hover:opacity-95">+ Add Contribution</button>
+          </form>
+          <div class="mt-4 rounded-3xl bg-white/60 border border-white/80 p-3">
+            <p class="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">Shortcuts</p>
+            <div class="grid grid-cols-3 gap-2">
+              <button class="quick-chip" onclick="contribAmount.value=500">₱500</button>
+              <button class="quick-chip" onclick="contribAmount.value=1000">₱1k</button>
+              <button class="quick-chip" onclick="contribAmount.value=Math.round(equalShare())">Share</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="lg:col-span-8 space-y-6">
+        <section class="glass rounded-[2rem] p-5">
+          <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4"><div><h2 class="text-2xl font-black text-slate-950">Things to Buy</h2><p class="text-sm text-slate-500">Edit names, categories, assignments, and prices on each card.</p></div><div class="flex gap-2"><input id="searchItems" class="field !py-2.5 max-w-[190px]" placeholder="Search" /><select id="filterCategory" class="field !py-2.5 max-w-[155px]"><option value="All">All</option></select></div></div>
+          <div id="itemsList" class="nice-scroll max-h-[760px] overflow-y-auto pr-1 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+          <div id="emptyItems" class="hidden rounded-3xl bg-white/70 border border-dashed border-slate-300 p-8 text-center text-slate-500 font-bold">No items yet. Add something to buy.</div>
+        </section>
+        <section class="glass rounded-[2rem] p-5">
+          <div class="flex items-end justify-between gap-3 mb-4"><div><h2 class="text-2xl font-black text-slate-950">People & Contributions</h2><p class="text-sm text-slate-500">Update payments as people confirm.</p></div></div>
+          <div id="contributionsList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+          <div id="emptyContrib" class="hidden rounded-3xl bg-white/70 border border-dashed border-slate-300 p-8 text-center text-slate-500 font-bold">No contributions yet. Add a person above.</div>
+        </section>
+      </section>
+    </section>
+
+    <footer class="mt-8 text-center text-sm text-slate-500 font-semibold">
+      Made for the Uwing Uwi trip crew. Autosaves on this device.
+    </footer>
+  </main>
+
+  <script>
+    const peso = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
+    const categoryOptions = ['Food', 'Drinks', 'Breakfast', 'Snacks', 'Ingredients', 'Other'];
+    const palette = {
+      Food: '#d97706', Drinks: '#0284c7', Breakfast: '#ca8a04', Snacks: '#7c3aed', Ingredients: '#059669', Other: '#64748b'
+    };
+    const softClasses = {
+      Food: 'bg-orange-100 text-orange-700', Drinks: 'bg-sky-100 text-sky-700', Breakfast: 'bg-yellow-100 text-yellow-700', Snacks: 'bg-violet-100 text-teal-700', Ingredients: 'bg-emerald-100 text-emerald-700', Other: 'bg-slate-100 text-slate-700'
+    };
+    const sampleItems = [
+      ['Adobo (1.5 whole chicken)','Food','Unassigned',1200], ['Tuna Pasta','Food','Unassigned',900], ['BBQ','Food','Unassigned',1600], ['Rice','Food','Unassigned',500], ['Sinigang Mix (sabaw)','Food','Unassigned',120], ['Breakfast set: Eggs, Hotdog, Corned Beef','Breakfast','Josh & Zendee',850], ["Lumpia (David's Tea House)",'Food','Dothy',700], ['Kopiko Brown','Drinks','Unassigned',300], ['Coke','Drinks','Unassigned',250], ['Sprite','Drinks','Unassigned',250], ['Yelo / Ice','Drinks','Unassigned',150], ['Chichirya / Chips','Snacks','Unassigned',400], ['Bawang / Garlic','Ingredients','Unassigned',80], ['Sibuyas / Onion','Ingredients','Unassigned',120], ['Oil','Ingredients','Unassigned',180], ['Laurel','Ingredients','Unassigned',50]
+    ].map(([name, category, assigned, price]) => ({ id: crypto.randomUUID(), name, category, assigned, price }));
+    const sampleContributions = ['Josh','Zendee','Dothy','Guest 4','Guest 5','Guest 6'].map(name => ({ id: crypto.randomUUID(), name, amount: 0 }));
+    let state = loadState();
+    let categoryChart, personChart;
+
+    function isDarkMode(){ return document.documentElement.classList.contains('dark-mode'); }
+    function applyTheme(theme){
+      const dark = theme === 'dark';
+      document.documentElement.classList.toggle('dark-mode', dark);
+      localStorage.setItem('uwingUwiTheme', dark ? 'dark' : 'light');
+      if (typeof themeIcon !== 'undefined') themeIcon.textContent = dark ? '☀️' : '🌙';
+      if (typeof themeLabel !== 'undefined') themeLabel.textContent = dark ? 'Light' : 'Dark';
+    }
+
+    function loadState(){
+      try {
+        const saved = JSON.parse(localStorage.getItem('uwingUwi2026State') || 'null');
+        if (saved) return { items: saved.items || [], contributions: saved.contributions || [], manualPeople: saved.manualPeople || '' };
+        const old = JSON.parse(localStorage.getItem('resortTripModernState') || 'null');
+        if (old) return { items: old.items || [], contributions: old.contributions || [], manualPeople: '' };
+      } catch(e) {}
+      return { items: structuredClone(sampleItems), contributions: structuredClone(sampleContributions), manualPeople: '' };
+    }
+    function saveState(){ localStorage.setItem('uwingUwi2026State', JSON.stringify(state)); if (typeof lastUpdated !== 'undefined') lastUpdated.textContent = 'Autosaved ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+    function showToast(message){ toast.textContent = message; toast.classList.add('show'); clearTimeout(showToast.timer); showToast.timer = setTimeout(()=>toast.classList.remove('show'), 1600); }
+    function totalItems(){ return state.items.reduce((s,x)=>s+(Number(x.price)||0),0); }
+    function totalContributions(){ return state.contributions.reduce((s,x)=>s+(Number(x.amount)||0),0); }
+    function peopleCount(){ const manual = Number(state.manualPeople); return manual > 0 ? manual : Math.max(state.contributions.length, 1); }
+    function equalShare(){ return totalItems() / peopleCount(); }
+    function escapeHtml(v){ return String(v ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+    function renderFilterOptions(){
+      const filter = document.getElementById('filterCategory'); const current = filter.value || 'All';
+      filter.innerHTML = ['All', ...categoryOptions].map(c=>`<option value="${c}" ${c===current?'selected':''}>${c}</option>`).join('');
+    }
+    function renderSummary(){
+      const total = totalItems(), contributed = totalContributions(), count = peopleCount(), progress = total ? Math.min(100, Math.round(contributed / total * 100)) : 0;
+      totalBudget.textContent = peso.format(total); costPerPerson.textContent = peso.format(equalShare()); peopleCountCard.textContent = count; totalContrib.textContent = peso.format(contributed); balanceNeeded.textContent = peso.format(Math.max(total - contributed, 0));
+      shareBadge.textContent = `Share: ${peso.format(equalShare())}`; progressBar.style.width = progress + '%'; progressText.textContent = `${progress}% funded`;
+      manualPeople.value = state.manualPeople || ''; peopleHint.textContent = state.manualPeople ? `Manual split: ${count} people.` : `Auto split: ${count} contribution card${count===1?'':'s'}.`;
+    }
+    function categoryTotals(){ return categoryOptions.map(category => state.items.filter(i=>i.category===category).reduce((s,i)=>s+(Number(i.price)||0),0)); }
+    function renderTopCategory(){
+      const totals = categoryTotals(); let max = Math.max(...totals,0); let idx = totals.indexOf(max);
+      topCategoryBadge.textContent = max > 0 ? `Top: ${categoryOptions[idx]}` : 'Top: —';
+    }
+    function renderItems(){
+      const query = searchItems.value.trim().toLowerCase(), filter = filterCategory.value;
+      const filtered = state.items.filter(item => ([item.name,item.assigned,item.category].join(' ').toLowerCase().includes(query)) && (filter==='All'||item.category===filter));
+      itemsList.innerHTML = filtered.map(item => `
+        <article class="item-card float-in rounded-3xl bg-white/78 border border-white p-4 soft">
+          <div class="flex items-start justify-between gap-3 mb-3"><span class="pill ${softClasses[item.category] || softClasses.Other}">${escapeHtml(item.category || 'Other')}</span><button class="mini-btn bg-rose-100 text-rose-700 hover:bg-rose-200" onclick="removeItem('${item.id}')">Remove</button></div>
+          <label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Item</label><input class="field mb-3 font-black text-slate-950" value="${escapeHtml(item.name)}" oninput="updateItem('${item.id}','name',this.value)" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Category</label><select class="field" onchange="updateItem('${item.id}','category',this.value)">${categoryOptions.map(c=>`<option ${c===item.category?'selected':''}>${c}</option>`).join('')}</select></div><div><label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Price</label><input class="field font-black text-right" type="number" min="0" step="1" value="${Number(item.price)||0}" oninput="updateItem('${item.id}','price',this.value)" /></div></div>
+          <label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1 mt-3">Assigned To</label><input class="field" value="${escapeHtml(item.assigned)}" oninput="updateItem('${item.id}','assigned',this.value)" />
+          <div class="mt-3 flex items-center justify-between rounded-2xl bg-gradient-to-r from-slate-50 to-indigo-50 p-3"><span class="text-sm text-slate-500 font-bold">Per person</span><span class="font-black text-teal-700">${peso.format((Number(item.price)||0)/peopleCount())}</span></div>
+        </article>`).join('');
+      emptyItems.classList.toggle('hidden', filtered.length !== 0);
+    }
+    function renderContributions(){
+      const share = equalShare();
+      contributionsList.innerHTML = state.contributions.map(c => { const amount=Number(c.amount)||0, balance=amount-share, ok=balance>=0; const pct = share ? Math.min(100, Math.round(amount/share*100)) : 0; return `
+        <article class="person-card float-in rounded-3xl bg-white/78 border border-white p-4 soft">
+          <div class="flex items-start justify-between gap-3 mb-3"><span class="pill ${ok?'bg-emerald-100 text-emerald-700':'bg-rose-100 text-rose-700'}">${ok?'Settled / Extra':'Needs Balance'}</span><button class="mini-btn bg-rose-100 text-rose-700 hover:bg-rose-200" onclick="removeContribution('${c.id}')">Remove</button></div>
+          <label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Person</label><input class="field mb-3 font-black text-slate-950" value="${escapeHtml(c.name)}" oninput="updateContribution('${c.id}','name',this.value)" />
+          <label class="block text-xs font-black uppercase tracking-wider text-slate-400 mb-1">Contributed</label><input class="field font-black text-right" type="number" min="0" step="1" value="${amount}" oninput="updateContribution('${c.id}','amount',this.value)" />
+          <div class="mt-3 h-3 rounded-full bg-slate-200 overflow-hidden"><div class="h-full rounded-full ${ok?'bg-gradient-to-r from-emerald-400 to-teal-500':'bg-gradient-to-r from-rose-400 to-orange-400'} transition-all duration-500" style="width:${pct}%"></div></div>
+          <div class="mt-3 rounded-2xl ${ok?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700'} p-3 font-black flex items-center justify-between"><span>Balance</span><span>${peso.format(balance)}</span></div>
+        </article>`; }).join('');
+      emptyContrib.classList.toggle('hidden', state.contributions.length !== 0);
+    }
+    function renderCharts(){
+      const dark = isDarkMode();
+      const chartText = dark ? '#e2e8f0' : '#334155';
+      const chartGrid = dark ? 'rgba(148,163,184,.18)' : 'rgba(148,163,184,.22)';
+      const chartBorder = dark ? 'rgba(15,23,42,.92)' : 'rgba(255,255,255,.96)';
+      const totals = categoryTotals(); const personLabels = state.contributions.map(c=>c.name || 'Unnamed'); const personTotals = state.contributions.map(c=>Number(c.amount)||0); const share = equalShare();
+      if(categoryChart) categoryChart.destroy(); if(personChart) personChart.destroy();
+      categoryChart = new Chart(categoryChartCanvas, { type:'doughnut', data:{ labels:categoryOptions, datasets:[{ data:totals, backgroundColor:categoryOptions.map(c=>palette[c]), hoverOffset:8, borderWidth:5, borderColor: chartBorder }] }, options:{ responsive:true, maintainAspectRatio:false, animation:{ animateRotate:true, animateScale:true, duration:550, easing:'easeOutQuart' }, plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, pointStyle:'circle', padding:16, font:{ weight:'bold' }, color: chartText } }, tooltip:{ callbacks:{ label:(ctx)=>`${ctx.label}: ${peso.format(ctx.parsed)}` } } }, cutout:'62%' } });
+      personChart = new Chart(personChartCanvas, { type:'bar', data:{ labels:personLabels, datasets:[{ label:'Contribution', data:personTotals, backgroundColor:personTotals.map(v=> v>=share ? '#059669' : '#fb7185'), borderRadius:8, borderSkipped:false }, { type:'line', label:'Equal Share', data:personLabels.map(()=>share), borderColor:'#0f766e', backgroundColor:'#0f766e', borderWidth:3, pointRadius:3, tension:.35 }] }, options:{ responsive:true, maintainAspectRatio:false, animation:{ duration:550, easing:'easeOutQuart' }, plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, font:{ weight:'bold' }, color: chartText } }, tooltip:{ callbacks:{ label:(ctx)=>`${ctx.dataset.label}: ${peso.format(ctx.parsed.y)}` } } }, scales:{ x:{ grid:{ display:false }, ticks:{ font:{ weight:'bold' }, color: chartText } }, y:{ beginAtZero:true, ticks:{ color: chartText, callback:v=>peso.format(v) }, grid:{ color: chartGrid } } } } });
+    }
+    function quickAddItem(name, category, price){ state.items.unshift({ id:crypto.randomUUID(), name, category, assigned:'Unassigned', price }); renderAll(); showToast(name + ' added'); }
+    function renderAll(){ renderFilterOptions(); renderSummary(); renderTopCategory(); renderItems(); renderContributions(); renderCharts(); saveState(); }
+    function updateItem(id,key,value){ const item=state.items.find(x=>x.id===id); if(!item) return; item[key]=key==='price'?Number(value):value; renderSummary(); renderTopCategory(); renderItems(); renderContributions(); renderCharts(); saveState(); }
+    function removeItem(id){ state.items=state.items.filter(x=>x.id!==id); renderAll(); showToast('Item removed'); }
+    function updateContribution(id,key,value){ const c=state.contributions.find(x=>x.id===id); if(!c) return; c[key]=key==='amount'?Number(value):value; renderSummary(); renderItems(); renderContributions(); renderCharts(); saveState(); }
+    function removeContribution(id){ state.contributions=state.contributions.filter(x=>x.id!==id); renderAll(); showToast('Contribution removed'); }
+    const categoryChartCanvas = document.getElementById('categoryChart'); const personChartCanvas = document.getElementById('personChart');
+    itemForm.addEventListener('submit', e=>{ e.preventDefault(); state.items.unshift({ id:crypto.randomUUID(), name:itemName.value.trim(), category:itemCategory.value, assigned:itemAssigned.value.trim()||'Unassigned', price:Number(itemPrice.value)||0 }); itemForm.reset(); itemAssigned.value='Unassigned'; renderAll(); showToast('Item added'); });
+    contributionForm.addEventListener('submit', e=>{ e.preventDefault(); state.contributions.unshift({ id:crypto.randomUUID(), name:contribName.value.trim(), amount:Number(contribAmount.value)||0 }); contributionForm.reset(); renderAll(); showToast('Contribution added'); });
+    manualPeople.addEventListener('input', ()=>{ state.manualPeople = manualPeople.value ? Math.max(1, Number(manualPeople.value)) : ''; renderSummary(); renderItems(); renderContributions(); renderCharts(); saveState(); });
+    searchItems.addEventListener('input', renderItems); filterCategory.addEventListener('change', renderItems);
+    sampleBtn.addEventListener('click', ()=>{ state={ items:structuredClone(sampleItems).map(x=>({...x,id:crypto.randomUUID()})), contributions:structuredClone(sampleContributions).map(x=>({...x,id:crypto.randomUUID()})), manualPeople:'' }; renderAll(); showToast('Sample data restored'); });
+    clearBtn.addEventListener('click', ()=>{ if(!confirm('Clear all items and contributions?')) return; state={ items:[], contributions:[], manualPeople:'' }; renderAll(); showToast('Dashboard cleared'); });
+    exportBtn.addEventListener('click', ()=>{ const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}); const link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='uwing-uwi-resort-trip-2026-budget.json'; link.click(); URL.revokeObjectURL(link.href); showToast('Export downloaded'); });
+
+    applyTheme(localStorage.getItem('uwingUwiTheme') === 'dark' ? 'dark' : 'light');
+    themeToggle.addEventListener('click', () => {
+      applyTheme(isDarkMode() ? 'light' : 'dark');
+      renderCharts();
+      showToast(isDarkMode() ? 'Dark mode on' : 'Light mode on');
+    });
+    window.addEventListener('load', () => setTimeout(() => loader.classList.add('hide'), 850));
+    renderAll();
+  </script>
+</body>
+</html>
