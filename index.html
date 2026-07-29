@@ -268,6 +268,11 @@
     }
     html.dark .toast { background: #f5f9fd; color: #101b28; }
     .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .toast .undo {
+      background: none; border: 0; cursor: pointer; margin-left: 10px; padding: 2px 4px;
+      color: #fcd34d; font-weight: 900; font-size: 14.5px; text-decoration: underline;
+    }
+    html.dark .toast .undo { color: #b45309; }
   </style>
 </head>
 <body>
@@ -515,11 +520,24 @@
       return { cls: 'extra', text: fmt(diff) + ' extra 🌟' };
     }
 
-    /* ---------- Toast ---------- */
+    /* ---------- Toast + one-tap Undo ---------- */
     let toastTimer;
-    function toast(msg) {
-      const t = $('toast'); t.textContent = msg; t.classList.add('show');
-      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+    function toast(msg, withUndo) {
+      const t = $('toast');
+      t.innerHTML = escapeHtml(msg) + (withUndo ? '<button type="button" class="undo" onclick="undoLast()">Undo</button>' : '');
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), withUndo ? 6000 : 1800);
+    }
+
+    let pendingUndo = null;
+    function snapshotForUndo() { pendingUndo = { json: JSON.stringify(state), at: Date.now() }; }
+    function undoLast() {
+      if (!pendingUndo || Date.now() - pendingUndo.at > 8000) { pendingUndo = null; return; }
+      try { state = JSON.parse(pendingUndo.json); } catch (e) { return; }
+      pendingUndo = null;
+      editingExp = null; editingPerson = null; payFor = null;
+      render(); toast('Brought it back ✓');
     }
 
     /* ---------- Trip navigation ---------- */
@@ -557,13 +575,13 @@
     }
     function deleteTrip() {
       const t = trip();
-      if (!confirm('Delete the whole trip “' + t.name + '” with all its items, friends, and payments?')) return;
+      snapshotForUndo();
       state.trips = state.trips.filter((x) => x.id !== t.id);
       if (!state.trips.length) state.trips.push(blankTrip('My trip'));
       state.currentTripId = state.trips[0].id;
       editingExp = null; editingPerson = null; payFor = null; searchText = ''; payFilter = 'all';
       $('search').value = '';
-      render(); toast('Trip deleted');
+      render(); toast('Deleted trip: ' + t.name, true);
     }
 
     /* ---------- Render: summary ---------- */
@@ -764,10 +782,10 @@
     }
     function deleteExpense(id) {
       const e = trip().expenses.find((x) => x.id === id); if (!e) return;
-      if (!confirm('Remove "' + e.name + '" from the list?')) return;
+      snapshotForUndo();
       trip().expenses = trip().expenses.filter((x) => x.id !== id);
       if (editingExp === id) editingExp = null;
-      render(); toast('Removed');
+      render(); toast('Removed ' + e.name, true);
     }
     function markPaid(id, value) {
       if (!value) return;
@@ -793,12 +811,12 @@
     }
     function deletePerson(id) {
       const p = personById(id); if (!p) return;
-      if (!confirm('Remove ' + p.name + '? Their cash payments will be deleted; things they paid for become “Shared money”.')) return;
+      snapshotForUndo();
       trip().expenses.forEach((e) => { if (e.paidBy === id) e.paidBy = POT; });
       trip().people = trip().people.filter((x) => x.id !== id);
       if (editingPerson === id) editingPerson = null;
       if (payFor === id) payFor = null;
-      render(); toast(p.name + ' removed');
+      render(); toast(p.name + ' removed', true);
     }
     function openPay(id) { payFor = id; editingExp = null; editingPerson = null; render(); }
     function closePay() { payFor = null; render(); }
@@ -816,9 +834,9 @@
     function deletePayment(personId, payId) {
       const p = personById(personId); if (!p) return;
       const pay = p.payments.find((x) => x.id === payId); if (!pay) return;
-      if (!confirm('Remove this ' + fmt(pay.amount) + ' payment from ' + p.name + '?')) return;
+      snapshotForUndo();
       p.payments = p.payments.filter((x) => x.id !== payId);
-      render(); toast('Payment removed');
+      render(); toast('Removed ' + fmt(pay.amount) + ' from ' + p.name, true);
     }
 
     /* ---------- Copy summary for group chat ---------- */
@@ -907,16 +925,19 @@
     $('restoreBtn').addEventListener('click', () => $('restoreFile').click());
     $('restoreFile').addEventListener('change', (e) => { if (e.target.files[0]) restoreBackup(e.target.files[0]); e.target.value = ''; });
     $('starterBtn').addEventListener('click', () => {
-      if (!confirm('Replace this trip’s list and friends with the starter plan (menu + 6 friends)?')) return;
+      snapshotForUndo();
       Object.assign(trip(), starterLists());
-      closeEditors(); toast('Starter list loaded');
+      editingExp = null; editingPerson = null; payFor = null;
+      render(); toast('Starter list loaded', true);
     });
     $('deleteTripBtn').addEventListener('click', deleteTrip);
     $('clearAllBtn').addEventListener('click', () => {
-      if (!confirm('Erase ALL trips, items, friends, and payments? This cannot be undone.')) return;
+      if (!confirm('Erase ALL trips, items, friends, and payments?')) return;
+      snapshotForUndo();
       state = { trips: [blankTrip('My trip')], currentTripId: null };
       state.currentTripId = state.trips[0].id;
-      closeEditors(); toast('Everything erased');
+      editingExp = null; editingPerson = null; payFor = null;
+      render(); toast('Everything erased', true);
     });
 
     applyTheme(document.documentElement.classList.contains('dark'));
@@ -928,7 +949,7 @@
     window.editExpense = editExpense; window.saveExpense = saveExpense; window.deleteExpense = deleteExpense;
     window.editPerson = editPerson; window.savePerson = savePerson; window.deletePerson = deletePerson;
     window.openPay = openPay; window.closePay = closePay; window.addPayment = addPayment; window.deletePayment = deletePayment;
-    window.closeEditors = closeEditors;
+    window.closeEditors = closeEditors; window.undoLast = undoLast;
   </script>
 </body>
 </html>
