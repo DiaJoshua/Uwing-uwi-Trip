@@ -24,9 +24,9 @@ Just double-click **index.html** and it opens in your browser (Chrome, Safari, E
 
 **✅ Trip to-dos.** A proper task list for the trip, like a to-do app. Type the task, optionally pick a due date, who's doing it, and a priority (🔥 High / ⚡ Medium / 🌿 Low), then **＋ Add task**. Tap the round circle to tick it off — tasks sort themselves so overdue and due-today things float to the top with colored labels. Filter with **All / ⏰ Today / 🔜 Upcoming / ✓ Done**, watch the progress bar fill, and use **🧹 Clear finished tasks** when the list gets long. Every trip has its own to-dos, and open tasks are included in the group chat update too.
 
-## 📋 The group chat button
+## 📤 Share & copy buttons
 
-Tap **Copy update for group chat** on the green card, then paste it in Messenger. It sends a ready-made update like:
+Tap **Share update** on the green card and your phone's own share menu opens — send straight to Messenger, WhatsApp, wherever. Prefer paste? **Copy for group chat** still copies the same ready-made update:
 
 ```
 🏖️ UWING UWI RESORT TRIP — money update
@@ -49,11 +49,24 @@ At the top you'll see trip buttons. Tap **＋ New trip** for the next outing (Ch
 
 Tap ✏️ on any item or friend to change it, or ✕ to remove it instantly — no annoying "are you sure?" popups. Deleted the wrong thing? Tap **Undo** in the little black popup at the bottom (it stays for a few seconds). Wrong payment? Open the friend's "money records" and tap ✕ next to it — same deal, with Undo.
 
+## Nice extras
+
+- **🕓 Recent activity** (near the bottom) — a little diary of who gave money, what got paid, and which tasks got done, with times. Great for "wait, who paid for the BBQ?"
+- **Auto dark mode** — it follows your phone's light/dark setting until you pick one yourself with the 🌙 button.
+- **Scroll down** and a slim glass bar keeps the trip total and share button in reach; tap it to jump back up.
+- Little 💡 tips sit under each section, and Uwi's speech bubble reacts to what's actually happening (overdue tasks, money progress).
+
+## ☁️ Cloud sync — same data on every device
+
+Tap **☁️ Cloud sync** at the bottom → **Turn on cloud sync**. You get a **trip code**. On any other phone or computer, open the tracker → ☁️ Cloud sync → paste the code → **Join**. From then on, everyone's changes flow to everyone (it checks when you open the app or come back to it, and saves a moment after you change something — the status line at the bottom tells you).
+
+Honest fine print: it uses a free community service (jsonblob.com), so treat it as convenient, not sacred — anyone who has the code can see and edit the trip, and free services can occasionally reset, so tap **Save backup** once in a while. No internet? No problem — the app keeps working offline and syncs when you're back.
+
 ## Good to know
 
-- Everything saves **on the device you're using** — it does not sync between phones. Easiest setup: one person keeps the "official" tracker and shares updates with the copy button.
+- Without cloud sync, everything saves **on the device you're using** only. With cloud sync on, all trips follow the trip code.
 - **Save backup** (bottom of the page) downloads one small file with all your trips. **Load backup** brings it back — this is also how you move everything to a new phone.
 - Clearing your browser's history/data can erase the tracker, so download a backup once in a while.
-- **Load starter list** refills the current trip with the original Uwing Uwi menu and friends. **Delete this trip** removes the trip you're viewing (Undo appears if it was a mistake). **Erase everything** wipes all trips — it's the only button that asks first.
+- The app starts as a **blank canvas** — name your trip with the ✏️ button, then add your own items and friends. **Delete this trip** removes the trip you're viewing (Undo appears if it was a mistake). **Erase everything** wipes all trips — it's the only button that asks first.
 
 Made with ❤️ for the Uwing Uwi crew.
