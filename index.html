@@ -74,6 +74,33 @@
       outline: 3px solid var(--teal); outline-offset: 2px;
     }
 
+    /* ---------- Subtle drifting background glows ---------- */
+    .bgfx { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .bgfx i {
+      position: absolute; display: block; border-radius: 999px; will-change: transform;
+    }
+    .bgfx i:nth-child(1) {
+      width: 46vmax; height: 46vmax; left: -14vmax; top: -16vmax;
+      background: radial-gradient(circle, rgba(16, 161, 132, .13), transparent 62%);
+      animation: drift1 38s ease-in-out infinite alternate;
+    }
+    .bgfx i:nth-child(2) {
+      width: 38vmax; height: 38vmax; right: -12vmax; top: 2vmax;
+      background: radial-gradient(circle, rgba(251, 191, 36, .11), transparent 62%);
+      animation: drift2 46s ease-in-out infinite alternate;
+    }
+    .bgfx i:nth-child(3) {
+      width: 36vmax; height: 36vmax; left: 24vmax; bottom: -18vmax;
+      background: radial-gradient(circle, rgba(244, 113, 95, .09), transparent 62%);
+      animation: drift3 54s ease-in-out infinite alternate;
+    }
+    @keyframes drift1 { to { transform: translate(6vmax, 5vmax) scale(1.07); } }
+    @keyframes drift2 { to { transform: translate(-6vmax, 7vmax) scale(1.05); } }
+    @keyframes drift3 { to { transform: translate(5vmax, -6vmax) scale(1.09); } }
+    html.dark .bgfx i:nth-child(1) { background: radial-gradient(circle, rgba(28, 180, 161, .10), transparent 62%); }
+    html.dark .bgfx i:nth-child(2) { background: radial-gradient(circle, rgba(226, 168, 60, .06), transparent 62%); }
+    html.dark .bgfx i:nth-child(3) { background: radial-gradient(circle, rgba(240, 100, 131, .05), transparent 62%); }
+
     .wrap { max-width: 1120px; margin: 0 auto; padding: calc(20px + env(safe-area-inset-top, 0px)) 14px calc(70px + env(safe-area-inset-bottom, 0px)); animation: fadeIn .35s ease both; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
@@ -382,6 +409,7 @@
   </style>
 </head>
 <body>
+  <div class="bgfx" aria-hidden="true"><i></i><i></i><i></i></div>
   <svg style="display:none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <symbol id="uwiSym" viewBox="0 0 120 104">
       <path d="M26 56 Q12 48 13 32" stroke="#e05a45" stroke-width="7" fill="none" stroke-linecap="round"/>
