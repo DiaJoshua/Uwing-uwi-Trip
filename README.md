@@ -2,6 +2,14 @@
 
 A simple money tracker for the barkada. It shows what the group is buying, who gave money, and who still owes — with no app to install and no internet needed.
 
+## 🦀 Meet Uwi
+
+That little crab at the top is **Uwi**, the trip mascot. Tap him anytime for a tip or a bit of hype (sometimes he throws confetti). He also cheers with a confetti shower when the trip gets **fully funded** 💰 and when you finish **every task** ✅.
+
+## 📲 Put it on your home screen
+
+Tap **📲 Add to home screen** at the bottom of the page and follow the steps for your phone (iPhone: Share → Add to Home Screen · Android: ⋮ menu → Add to Home screen). After that it opens like a real app, with Uwi as the icon.
+
 ## How to open it
 
 Just double-click **index.html** and it opens in your browser (Chrome, Safari, Edge — anything works). On a phone, open the file from your Files app or tap it in your chat/email. That's it. Everything you type saves automatically on that phone or computer.
