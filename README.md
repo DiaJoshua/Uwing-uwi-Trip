@@ -1,14 +1,14 @@
-# 🏖️ Trip Money Tracker
+# 🦀 Sipit v2 — Trip Money Tracker
 
 A simple money tracker for the barkada. It shows what the group is buying, who gave money, and who still owes — with no app to install and no internet needed.
 
-## 🦀 Meet Uwi
+## 🦀 Meet Sipit
 
-That little crab at the top is **Uwi**, the trip mascot. Tap him anytime for a tip or a bit of hype (sometimes he throws confetti). He also cheers with a confetti shower when the trip gets **fully funded** 💰 and when you finish **every task** ✅.
+That little crab at the top is **Sipit** ("claw" — the claw that holds the barkada's money). Tap him anytime for a tip or a bit of hype. He cheers with a confetti shower when the trip gets **fully funded** 💰 and when you finish **every task** ✅.
 
 ## 📲 Put it on your home screen
 
-Tap **📲 Add to home screen** at the bottom of the page and follow the steps for your phone (iPhone: Share → Add to Home Screen · Android: ⋮ menu → Add to Home screen). After that it opens like a real app, with Uwi as the icon.
+Tap **📲 Add to home screen** at the bottom of the page and follow the steps for your phone (iPhone: Share → Add to Home Screen · Android: ⋮ menu → Add to Home screen). After that it opens like a real app, with Sipit as the icon.
 
 ## How to open it
 
@@ -52,9 +52,13 @@ Tap ✏️ on any item or friend to change it, or ✕ to remove it instantly —
 ## Nice extras
 
 - **🕓 Recent activity** (near the bottom) — a little diary of who gave money, what got paid, and which tasks got done, with times. Great for "wait, who paid for the BBQ?"
+- **Jump bar** — the 🧾 👥 ✅ pills under your trips scroll you straight to any section.
+- **"Waiting on" chips** — the green card shows exactly who still needs to give money (tap to jump to them). On a brand-new trip it shows the 3 getting-started steps instead.
 - **Auto dark mode** — it follows your phone's light/dark setting until you pick one yourself with the 🌙 button.
 - **Scroll down** and a slim glass bar keeps the trip total and share button in reach; tap it to jump back up.
-- Little 💡 tips sit under each section, and Uwi's speech bubble reacts to what's actually happening (overdue tasks, money progress).
+- Little 💡 tips sit under each section, and Sipit's speech bubble reacts to what's actually happening (overdue tasks, money progress).
+- **📝 Trip notes** — a free space for meet-up time, addresses, contact numbers. Saves as you type and syncs with the cloud like everything else.
+- **📊 Breakdown & settle-up** — bars showing where the money goes by category, plus the fewest transfers to get everyone square ("Zendee → Josh: ₱1,000"). The settle-up list is included in the group chat update too.
 
 ## ☁️ Cloud sync — same data on every device
 
