@@ -12,6 +12,9 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root { color-scheme: light; }
+    html.dark { color-scheme: dark; }
+
     :root {
       --bg-glow: rgba(251, 191, 36, .20);
       --card: #ffffff; --line: #eae4d7; --chipbg: #f2f4f3;
@@ -202,6 +205,7 @@
       color: var(--mut); transition: all .15s ease; padding: 6px 4px;
     }
     .seg button.on { background: var(--card); color: var(--ink-strong); box-shadow: var(--shadow-sm); }
+    @media (max-width: 480px) { .seg button { font-size: 12px; padding: 6px 2px; } }
 
     /* ---------- Two columns ---------- */
     .cols { display: grid; gap: 18px; }
@@ -252,6 +256,31 @@
     .empty { border: 2px dashed var(--line); border-radius: 18px; padding: 26px 16px; text-align: center; color: var(--mut); font-weight: 700; margin-top: 14px; }
     .tot { margin-top: 14px; font-weight: 800; color: var(--mut); font-size: 14px; text-align: right; }
     .tot b { color: var(--ink-strong); }
+
+    /* ---------- To-do list ---------- */
+    .todocard { margin-top: 18px; }
+    .cols2 { display: grid; gap: 18px; }
+    @media (min-width: 980px) { .cols2 { grid-template-columns: .9fr 1.1fr; align-items: start; } }
+    .todo-check {
+      width: 34px; height: 34px; border-radius: 999px; border: 2.5px solid var(--line);
+      background: var(--card); flex-shrink: 0; display: grid; place-items: center;
+      font-size: 15px; font-weight: 900; color: transparent; transition: all .18s ease; margin-top: 2px;
+    }
+    .todo-check:hover { border-color: var(--teal); }
+    .todo-check.done { background: linear-gradient(135deg, var(--green), var(--teal)); border-color: transparent; color: #fff; animation: pop .25s ease; }
+    @keyframes pop { 0% { transform: scale(.75); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+    .todo-text { font-weight: 800; color: var(--ink-strong); font-size: 15.5px; overflow-wrap: anywhere; }
+    .todo-text.isdone { text-decoration: line-through; color: var(--faint); }
+    .tag.overdue { background: var(--rose-wash); color: var(--rose-ink); }
+    .tag.today { background: var(--amber-wash); color: var(--amber-ink); }
+    .tag.p-high { background: var(--rose-wash); color: var(--rose-ink); }
+    .tag.p-med { background: var(--amber-wash); color: var(--amber-ink); }
+    .tag.p-low { background: var(--teal-wash); color: var(--teal-ink); }
+    .progress2 { height: 12px; border-radius: 999px; background: var(--chipbg); overflow: hidden; }
+    .progress2 > div { height: 100%; width: 0%; border-radius: 999px; background: linear-gradient(90deg, var(--teal), var(--green)); transition: width .5s ease; }
+    .todo-progress-text { color: var(--mut); font-size: 13.5px; font-weight: 800; margin-top: 7px; }
+    .linkbtn { color: var(--teal-ink); font-weight: 800; text-decoration: underline; font-size: 13.5px; padding: 8px 2px; margin-top: 10px; }
+    input[type="date"].field { min-height: 52px; }
 
     /* ---------- Footer ---------- */
     footer { margin-top: 34px; text-align: center; color: var(--mut); font-size: 13.5px; font-weight: 600; }
@@ -356,6 +385,34 @@
 
     </div>
 
+    <!-- To-dos -->
+    <section class="card todocard" aria-label="Trip to-do list">
+      <h2>✅ Trip to-dos</h2>
+      <p class="hint">Little jobs before and during the trip — who's doing what, and by when.</p>
+      <div class="cols2">
+        <div>
+          <form id="todoForm" class="stack" autocomplete="off">
+            <input id="todoText" class="field" placeholder="What needs doing? (e.g. Book the cottage)" required maxlength="80" />
+            <div class="grid2">
+              <input id="todoDue" class="field" type="date" aria-label="Due date (optional)" title="Due date (optional)" />
+              <select id="todoWho" class="field" aria-label="Who will do it?"></select>
+            </div>
+            <div id="prioChips" class="chips" aria-label="Priority"></div>
+            <button class="btn btn-primary w100" type="submit">＋ Add task</button>
+          </form>
+          <div id="todoSuggest"></div>
+        </div>
+        <div>
+          <div class="progress2"><div id="todoBar"></div></div>
+          <p id="todoProgressText" class="todo-progress-text"></p>
+          <div id="todoTabs" class="seg" role="tablist" aria-label="Filter tasks"></div>
+          <div id="todoList" class="list"></div>
+          <div id="todoEmpty" class="empty" hidden></div>
+          <button id="clearDoneBtn" class="linkbtn" type="button" hidden>🧹 Clear finished tasks</button>
+        </div>
+      </div>
+    </section>
+
     <footer>
       <p>Made for the barkada 🌊 · saves automatically on this phone or computer</p>
       <div class="flinks">
@@ -390,6 +447,13 @@
     const THEME_KEY = 'uwingUwiTheme';
     const CATS = { Food: '🍗', Drinks: '🥤', Breakfast: '🍳', Snacks: '🍿', Ingredients: '🧄', Travel: '🚌', Other: '📦' };
     const POT = 'pot'; // "shared money" marker
+    const PRIO = { high: ['🔥', 'High'], med: ['⚡', 'Medium'], low: ['🌿', 'Low'] };
+    const TODO_IDEAS = [
+      ['Book the cottage & pay reservation', 'high'],
+      ['Collect everyone’s share', 'high'],
+      ['Buy ice + last-minute stuff', 'low'],
+      ['Bring speaker, cards & chargers', 'low']
+    ];
 
     /* ---------- Starter data (the Uwing Uwi plan) ---------- */
     function starterLists() {
@@ -413,14 +477,21 @@
       ];
       return {
         people: ['Josh', 'Zendee', 'Dothy', 'Guest 4', 'Guest 5', 'Guest 6'].map((name) => ({ id: uid(), name, payments: [] })),
-        expenses: menu.map(([name, category, amount, note]) => ({ id: uid(), name, category, amount, paidBy: '', note, date: todayISO() }))
+        expenses: menu.map(([name, category, amount, note]) => ({ id: uid(), name, category, amount, paidBy: '', note, date: todayISO() })),
+        todos: [
+          ['Book the cottage & pay reservation', 'high'],
+          ['Confirm final headcount', 'med'],
+          ['Collect everyone’s share', 'high'],
+          ['Buy ice + last-minute stuff on the day', 'low'],
+          ['Bring speaker, cards & chargers', 'low']
+        ].map(([text, prio]) => ({ id: uid(), text, done: false, due: '', who: '', prio, createdAt: new Date().toISOString(), doneAt: '' }))
       };
     }
     function starterState() {
       const t = Object.assign({ id: uid(), name: 'Uwing Uwi Resort Trip' }, starterLists());
       return { trips: [t], currentTripId: t.id };
     }
-    function blankTrip(name) { return { id: uid(), name: name || 'My trip', people: [], expenses: [] }; }
+    function blankTrip(name) { return { id: uid(), name: name || 'My trip', people: [], expenses: [], todos: [] }; }
 
     /* ---------- Normalizing / migration ---------- */
     function normalizeLists(raw) {
@@ -444,6 +515,16 @@
           paidBy: e.paidBy === POT ? POT : String(e.paidBy || ''),
           note: String(e.note || '').slice(0, 60),
           date: String(e.date || todayISO())
+        })),
+        todos: (Array.isArray(raw && raw.todos) ? raw.todos : []).map((t) => ({
+          id: String(t.id || uid()),
+          text: String(t.text || 'Task').slice(0, 100),
+          done: !!t.done,
+          due: /^\d{4}-\d{2}-\d{2}$/.test(String(t.due || '')) ? String(t.due) : '',
+          who: String(t.who || ''),
+          prio: PRIO[t.prio] ? t.prio : 'med',
+          createdAt: String(t.createdAt || ''),
+          doneAt: String(t.doneAt || '')
         }))
       };
     }
@@ -499,8 +580,11 @@
     let payFilter = 'all';     // 'all' | 'topay' | 'paid'
     let editingExp = null;     // expense id being edited
     let editingPerson = null;  // person id being renamed
+    let editingTodo = null;    // todo id being edited
     let payFor = null;         // person id with the "add money" box open
     let searchText = '';
+    let todoFilter = 'all';    // 'all' | 'today' | 'up' | 'done'
+    let selectedPrio = 'med';
 
     const trip = () => state.trips.find((t) => t.id === state.currentTripId) || state.trips[0];
 
@@ -536,7 +620,7 @@
       if (!pendingUndo || Date.now() - pendingUndo.at > 8000) { pendingUndo = null; return; }
       try { state = JSON.parse(pendingUndo.json); } catch (e) { return; }
       pendingUndo = null;
-      editingExp = null; editingPerson = null; payFor = null;
+      editingExp = null; editingPerson = null; editingTodo = null; payFor = null;
       render(); toast('Brought it back ✓');
     }
 
@@ -552,7 +636,7 @@
     function switchTrip(id) {
       if (!state.trips.some((t) => t.id === id)) return;
       state.currentTripId = id;
-      editingExp = null; editingPerson = null; payFor = null; searchText = ''; payFilter = 'all';
+      editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
       $('search').value = '';
       render(); toast('Now viewing: ' + trip().name);
     }
@@ -560,10 +644,10 @@
       const name = (prompt('Name for the new trip or event?\n(e.g. Christmas Party, Beach 2027)') || '').trim();
       if (!name) return;
       const friends = trip().people.map((p) => ({ id: uid(), name: p.name, payments: [] }));
-      const t = { id: uid(), name: name.slice(0, 40), people: friends, expenses: [] };
+      const t = { id: uid(), name: name.slice(0, 40), people: friends, expenses: [], todos: [] };
       state.trips.push(t);
       state.currentTripId = t.id;
-      editingExp = null; editingPerson = null; payFor = null; searchText = ''; payFilter = 'all';
+      editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
       $('search').value = '';
       render(); toast('“' + t.name + '” created — friends copied over 🎉');
     }
@@ -579,7 +663,7 @@
       state.trips = state.trips.filter((x) => x.id !== t.id);
       if (!state.trips.length) state.trips.push(blankTrip('My trip'));
       state.currentTripId = state.trips[0].id;
-      editingExp = null; editingPerson = null; payFor = null; searchText = ''; payFilter = 'all';
+      editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
       $('search').value = '';
       render(); toast('Deleted trip: ' + t.name, true);
     }
@@ -752,12 +836,13 @@
 
     /* ---------- Render all ---------- */
     function render() {
-      renderTripNav(); renderSummary(); renderChips(); renderSegTabs(); renderPaidBySelect(); renderExpenses(); renderPeople(); save();
+      renderTripNav(); renderSummary(); renderChips(); renderSegTabs(); renderPaidBySelect(); renderExpenses(); renderPeople(); renderTodos(); save();
       if (payFor && $('payAmt')) $('payAmt').focus();
       if (editingExp && $('eeName')) $('eeName').focus();
       if (editingPerson && $('epName')) $('epName').focus();
+      if (editingTodo && $('tdText')) $('tdText').focus();
     }
-    function closeEditors() { editingExp = null; editingPerson = null; payFor = null; render(); }
+    function closeEditors() { editingExp = null; editingPerson = null; editingTodo = null; payFor = null; render(); }
 
     /* ---------- Actions: expenses ---------- */
     function addExpense(ev) {
@@ -813,6 +898,7 @@
       const p = personById(id); if (!p) return;
       snapshotForUndo();
       trip().expenses.forEach((e) => { if (e.paidBy === id) e.paidBy = POT; });
+      todosOf().forEach((t) => { if (t.who === id) t.who = ''; });
       trip().people = trip().people.filter((x) => x.id !== id);
       if (editingPerson === id) editingPerson = null;
       if (payFor === id) payFor = null;
@@ -839,6 +925,161 @@
       render(); toast('Removed ' + fmt(pay.amount) + ' from ' + p.name, true);
     }
 
+    /* ---------- To-dos ---------- */
+    const todosOf = () => trip().todos || (trip().todos = []);
+    const prioRank = { high: 0, med: 1, low: 2 };
+
+    function dueInfo(t) {
+      if (t.done || !t.due) return null;
+      const today = todayISO();
+      if (t.due < today) return { cls: 'overdue', label: '⏰ Overdue · ' + niceDate(t.due) };
+      if (t.due === today) return { cls: 'today', label: '⏰ Due today' };
+      return { cls: '', label: '📅 ' + niceDate(t.due) };
+    }
+    function todoCounts() {
+      const ts = todosOf();
+      const open = ts.filter((t) => !t.done);
+      const today = todayISO();
+      return {
+        all: ts.length,
+        today: open.filter((t) => t.due && t.due <= today).length,
+        up: open.filter((t) => !t.due || t.due > today).length,
+        done: ts.length - open.length
+      };
+    }
+    function sortedTodos() {
+      const today = todayISO();
+      const rank = (t) => t.done ? 9 : !t.due ? 3 : t.due < today ? 0 : t.due === today ? 1 : 2;
+      return [...todosOf()].sort((a, b) =>
+        rank(a) - rank(b) ||
+        String(a.due || '9999').localeCompare(String(b.due || '9999')) ||
+        prioRank[a.prio] - prioRank[b.prio] ||
+        String(b.createdAt).localeCompare(String(a.createdAt))
+      );
+    }
+    function renderTodoWho() {
+      const sel = $('todoWho'); const current = sel.value || '';
+      sel.innerHTML = '<option value="">🙋 Anyone can do it</option>' +
+        trip().people.map((p) => '<option value="' + p.id + '"' + (current === p.id ? ' selected' : '') + '>👤 ' + escapeHtml(p.name) + '</option>').join('');
+      sel.value = [...sel.options].some((o) => o.value === current) ? current : '';
+    }
+    function renderPrioChips() {
+      $('prioChips').innerHTML = Object.keys(PRIO).map((k) =>
+        '<button type="button" class="chip' + (k === selectedPrio ? ' on' : '') + '" onclick="setPrio(\'' + k + '\')">' + PRIO[k][0] + ' ' + PRIO[k][1] + '</button>'
+      ).join('');
+    }
+    function setPrio(k) { if (PRIO[k]) { selectedPrio = k; renderPrioChips(); } }
+    function renderTodoTabs() {
+      const c = todoCounts();
+      const tabs = [['all', 'All (' + c.all + ')'], ['today', '⏰ Today (' + c.today + ')'], ['up', '🔜 Upcoming (' + c.up + ')'], ['done', '✓ Done (' + c.done + ')']];
+      $('todoTabs').innerHTML = tabs.map(([f, label]) =>
+        '<button type="button" role="tab" aria-selected="' + (todoFilter === f) + '" class="' + (todoFilter === f ? 'on' : '') + '" onclick="setTodoFilter(\'' + f + '\')">' + label + '</button>'
+      ).join('');
+    }
+    function setTodoFilter(f) { todoFilter = f; renderTodoTabs(); renderTodoList(); }
+
+    function todoRowHTML(t) {
+      if (editingTodo === t.id) {
+        return '<article class="rowcard"><div class="editbox">' +
+          '<input id="tdText" class="field" value="' + escapeHtml(t.text) + '" maxlength="80" placeholder="What needs doing?" />' +
+          '<div class="grid2">' +
+            '<input id="tdDue" class="field" type="date" value="' + escapeHtml(t.due) + '" />' +
+            '<select id="tdWho" class="field"><option value="">🙋 Anyone can do it</option>' + trip().people.map((p) => '<option value="' + p.id + '"' + (p.id === t.who ? ' selected' : '') + '>👤 ' + escapeHtml(p.name) + '</option>').join('') + '</select>' +
+          '</div>' +
+          '<select id="tdPrio" class="field">' + Object.keys(PRIO).map((k) => '<option value="' + k + '"' + (k === t.prio ? ' selected' : '') + '>' + PRIO[k][0] + ' ' + PRIO[k][1] + ' priority</option>').join('') + '</select>' +
+          '<div class="btns">' +
+            '<button type="button" class="btn btn-primary small" onclick="saveTodo(\'' + t.id + '\')">✓ Save</button>' +
+            '<button type="button" class="btn btn-ghost small" onclick="closeEditors()">Cancel</button>' +
+            '<span class="spacer"></span>' +
+            '<button type="button" class="icon-btn danger" title="Delete" aria-label="Delete task" onclick="deleteTodo(\'' + t.id + '\')">🗑</button>' +
+          '</div>' +
+        '</div></article>';
+      }
+      const who = personById(t.who);
+      const di = dueInfo(t);
+      const tags = [];
+      if (di) tags.push('<span class="tag ' + di.cls + '">' + di.label + '</span>');
+      if (who) tags.push('<span class="tag note">👤 ' + escapeHtml(who.name) + '</span>');
+      if (!t.done) tags.push('<span class="tag p-' + t.prio + '">' + PRIO[t.prio][0] + ' ' + PRIO[t.prio][1] + '</span>');
+      else tags.push('<span class="tag paid">✓ done' + (t.doneAt ? ' · ' + niceDate(t.doneAt) : '') + '</span>');
+      return '<article class="rowcard">' +
+        '<div class="row-main">' +
+          '<button type="button" class="todo-check' + (t.done ? ' done' : '') + '" aria-label="' + (t.done ? 'Mark as not done' : 'Mark as done') + '" onclick="toggleTodo(\'' + t.id + '\')">✓</button>' +
+          '<div class="row-info"><p class="todo-text' + (t.done ? ' isdone' : '') + '">' + escapeHtml(t.text) + '</p>' + (tags.length ? '<div class="row-tags">' + tags.join('') + '</div>' : '') + '</div>' +
+          '<div class="row-side"><div class="row-btns">' +
+            '<button type="button" class="icon-btn" title="Edit" aria-label="Edit task" onclick="editTodo(\'' + t.id + '\')">✏️</button>' +
+            '<button type="button" class="icon-btn danger" title="Delete" aria-label="Delete task" onclick="deleteTodo(\'' + t.id + '\')">✕</button>' +
+          '</div></div>' +
+        '</div></article>';
+    }
+    function renderTodoList() {
+      const today = todayISO();
+      const list = sortedTodos().filter((t) =>
+        todoFilter === 'all' ? true :
+        todoFilter === 'today' ? (!t.done && t.due && t.due <= today) :
+        todoFilter === 'up' ? (!t.done && (!t.due || t.due > today)) :
+        t.done
+      );
+      $('todoList').innerHTML = list.map(todoRowHTML).join('');
+      const c = todoCounts();
+      const empty = $('todoEmpty');
+      if (c.all === 0) { empty.hidden = false; empty.textContent = 'No tasks yet — add one, or tap a quick idea 🙂'; }
+      else if (!list.length) {
+        empty.hidden = false;
+        empty.textContent = todoFilter === 'today' ? 'Nothing due today — chill 🌴' : todoFilter === 'up' ? 'No upcoming tasks.' : todoFilter === 'done' ? 'Nothing finished yet.' : '';
+      } else empty.hidden = true;
+      const pctT = c.all ? Math.round(c.done / c.all * 100) : 0;
+      $('todoBar').style.width = pctT + '%';
+      $('todoProgressText').textContent = c.all ? c.done + ' of ' + c.all + ' tasks done (' + pctT + '%)' : 'Add tasks to see progress here.';
+      $('todoSuggest').innerHTML = c.all === 0
+        ? '<p class="hint" style="margin:14px 0 8px">Quick ideas:</p><div class="chips">' + TODO_IDEAS.map((s, i) => '<button type="button" class="chip" onclick="addSuggested(' + i + ')">＋ ' + escapeHtml(s[0]) + '</button>').join('') + '</div>'
+        : '';
+      $('clearDoneBtn').hidden = c.done === 0;
+    }
+    function renderTodos() { renderTodoWho(); renderPrioChips(); renderTodoTabs(); renderTodoList(); }
+
+    function addTodo(ev) {
+      ev.preventDefault();
+      const text = $('todoText').value.trim(); if (!text) return;
+      todosOf().unshift({ id: uid(), text, done: false, due: $('todoDue').value || '', who: $('todoWho').value || '', prio: selectedPrio, createdAt: new Date().toISOString(), doneAt: '' });
+      $('todoText').value = ''; $('todoDue').value = '';
+      render(); toast('Task added ✓'); $('todoText').focus();
+    }
+    function addSuggested(i) {
+      const s = TODO_IDEAS[i]; if (!s) return;
+      todosOf().unshift({ id: uid(), text: s[0], done: false, due: '', who: '', prio: s[1], createdAt: new Date().toISOString(), doneAt: '' });
+      render(); toast('Task added ✓');
+    }
+    function toggleTodo(id) {
+      const t = todosOf().find((x) => x.id === id); if (!t) return;
+      t.done = !t.done; t.doneAt = t.done ? todayISO() : '';
+      render();
+      const c = todoCounts();
+      if (t.done && c.all > 0 && c.done === c.all) toast('All tasks done! 🎉 Beach mode.');
+    }
+    function editTodo(id) { editingTodo = id; editingExp = null; editingPerson = null; payFor = null; render(); }
+    function saveTodo(id) {
+      const t = todosOf().find((x) => x.id === id); if (!t) return;
+      const text = $('tdText').value.trim(); if (text) t.text = text;
+      t.due = $('tdDue').value || '';
+      t.who = $('tdWho').value || '';
+      t.prio = PRIO[$('tdPrio').value] ? $('tdPrio').value : 'med';
+      editingTodo = null; render(); toast('Saved ✓');
+    }
+    function deleteTodo(id) {
+      const t = todosOf().find((x) => x.id === id); if (!t) return;
+      snapshotForUndo();
+      trip().todos = todosOf().filter((x) => x.id !== id);
+      if (editingTodo === id) editingTodo = null;
+      render(); toast('Removed task', true);
+    }
+    function clearDone() {
+      if (!todosOf().some((t) => t.done)) return;
+      snapshotForUndo();
+      trip().todos = todosOf().filter((t) => !t.done);
+      render(); toast('Cleared finished tasks', true);
+    }
+
     /* ---------- Copy summary for group chat ---------- */
     function buildSummaryText() {
       const total = tripTotal(), collected = totalCollected();
@@ -862,6 +1103,16 @@
       }
       if (unpaid.length) {
         lines.push('', '🛒 Still to buy/pay: ' + unpaid.length + ' item' + (unpaid.length === 1 ? '' : 's') + ' worth ' + fmt(unpaid.reduce((s, e) => s + e.amount, 0)));
+      }
+      const ts = todosOf();
+      if (ts.length) {
+        const open = ts.filter((t) => !t.done);
+        lines.push('', '✅ Tasks: ' + (ts.length - open.length) + '/' + ts.length + ' done');
+        open.slice(0, 3).forEach((t) => {
+          const who = personById(t.who);
+          lines.push('◻ ' + t.text + (t.due ? ' (due ' + niceDate(t.due) + ')' : '') + (who ? ' — ' + who.name : ''));
+        });
+        if (open.length > 3) lines.push('…and ' + (open.length - 3) + ' more');
       }
       return lines.join('\n');
     }
@@ -897,7 +1148,7 @@
           const data = normalizeState(JSON.parse(reader.result));
           if (!data) throw new Error('empty');
           state = data;
-          editingExp = null; editingPerson = null; payFor = null; searchText = ''; payFilter = 'all';
+          editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
           $('search').value = '';
           render(); toast('Backup loaded ✓');
         } catch (e) { toast('That file is not a valid backup'); }
@@ -917,6 +1168,8 @@
     /* ---------- Wire up ---------- */
     $('expForm').addEventListener('submit', addExpense);
     $('personForm').addEventListener('submit', addPerson);
+    $('todoForm').addEventListener('submit', addTodo);
+    $('clearDoneBtn').addEventListener('click', clearDone);
     $('search').addEventListener('input', () => { searchText = $('search').value; renderExpenses(); });
     $('copyBtn').addEventListener('click', copySummary);
     $('renameBtn').addEventListener('click', renameTrip);
@@ -927,7 +1180,7 @@
     $('starterBtn').addEventListener('click', () => {
       snapshotForUndo();
       Object.assign(trip(), starterLists());
-      editingExp = null; editingPerson = null; payFor = null;
+      editingExp = null; editingPerson = null; editingTodo = null; payFor = null;
       render(); toast('Starter list loaded', true);
     });
     $('deleteTripBtn').addEventListener('click', deleteTrip);
@@ -936,7 +1189,7 @@
       snapshotForUndo();
       state = { trips: [blankTrip('My trip')], currentTripId: null };
       state.currentTripId = state.trips[0].id;
-      editingExp = null; editingPerson = null; payFor = null;
+      editingExp = null; editingPerson = null; editingTodo = null; payFor = null;
       render(); toast('Everything erased', true);
     });
 
@@ -950,6 +1203,8 @@
     window.editPerson = editPerson; window.savePerson = savePerson; window.deletePerson = deletePerson;
     window.openPay = openPay; window.closePay = closePay; window.addPayment = addPayment; window.deletePayment = deletePayment;
     window.closeEditors = closeEditors; window.undoLast = undoLast;
+    window.setPrio = setPrio; window.setTodoFilter = setTodoFilter; window.addSuggested = addSuggested;
+    window.toggleTodo = toggleTodo; window.editTodo = editTodo; window.saveTodo = saveTodo; window.deleteTodo = deleteTodo;
   </script>
 </body>
 </html>

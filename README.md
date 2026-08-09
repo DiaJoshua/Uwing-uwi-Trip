@@ -6,13 +6,15 @@ A simple money tracker for the barkada. It shows what the group is buying, who g
 
 Just double-click **index.html** and it opens in your browser (Chrome, Safari, Edge — anything works). On a phone, open the file from your Files app or tap it in your chat/email. That's it. Everything you type saves automatically on that phone or computer.
 
-## The three parts
+## The four parts
 
 **Green card on top (Summary).** The big number is the trip total. Below it: how much money is collected, how much is still needed, and how much each person should give. The yellow bar fills up as money comes in.
 
 **🧾 Spending list.** Type what it is and how much, pick a category, then tap **＋ Add to the list**. If nobody has paid for it yet, it stays as "to buy". When someone pays, tap **💸 Mark as paid** on that item and choose who paid (or "Shared money" if it came from the group pot). Use the **All / 🛒 To buy / ✓ Paid** tabs to see what's still missing.
 
 **👥 Friends & money given.** Add each friend once. Every time someone hands over cash, tap **＋ Add money from [name]** and type the amount. Each friend's card tells you plainly: *✓ Settled*, *needs ₱500 more*, or *₱200 extra*. Tap "money records" under a friend to see every payment.
+
+**✅ Trip to-dos.** A proper task list for the trip, like a to-do app. Type the task, optionally pick a due date, who's doing it, and a priority (🔥 High / ⚡ Medium / 🌿 Low), then **＋ Add task**. Tap the round circle to tick it off — tasks sort themselves so overdue and due-today things float to the top with colored labels. Filter with **All / ⏰ Today / 🔜 Upcoming / ✓ Done**, watch the progress bar fill, and use **🧹 Clear finished tasks** when the list gets long. Every trip has its own to-dos, and open tasks are included in the group chat update too.
 
 ## 📋 The group chat button
 
@@ -37,13 +39,13 @@ At the top you'll see trip buttons. Tap **＋ New trip** for the next outing (Ch
 
 ## Fixing mistakes
 
-Tap ✏️ on any item or friend to change it, or ✕ to remove it (it always asks first). Wrong payment? Open the friend's "money records" and tap ✕ next to it.
+Tap ✏️ on any item or friend to change it, or ✕ to remove it instantly — no annoying "are you sure?" popups. Deleted the wrong thing? Tap **Undo** in the little black popup at the bottom (it stays for a few seconds). Wrong payment? Open the friend's "money records" and tap ✕ next to it — same deal, with Undo.
 
 ## Good to know
 
 - Everything saves **on the device you're using** — it does not sync between phones. Easiest setup: one person keeps the "official" tracker and shares updates with the copy button.
 - **Save backup** (bottom of the page) downloads one small file with all your trips. **Load backup** brings it back — this is also how you move everything to a new phone.
 - Clearing your browser's history/data can erase the tracker, so download a backup once in a while.
-- **Load starter list** refills the current trip with the original Uwing Uwi menu and friends. **Delete this trip** and **Erase everything** do what they say — carefully!
+- **Load starter list** refills the current trip with the original Uwing Uwi menu and friends. **Delete this trip** removes the trip you're viewing (Undo appears if it was a mistake). **Erase everything** wipes all trips — it's the only button that asks first.
 
 Made with ❤️ for the Uwing Uwi crew.
