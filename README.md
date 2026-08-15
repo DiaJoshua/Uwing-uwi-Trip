@@ -55,6 +55,7 @@ Tap ✏️ on any item or friend to change it, or ✕ to remove it instantly —
 - **Jump bar** — the 🧾 👥 ✅ pills under your trips scroll you straight to any section.
 - **"Waiting on" chips** — the green card shows exactly who still needs to give money (tap to jump to them). On a brand-new trip it shows the 3 getting-started steps instead.
 - **Auto dark mode** — it follows your phone's light/dark setting until you pick one yourself with the 🌙 button.
+- **🔊 Little sounds** — soft blips when you hover and tap, a coin *ding* when money moves, a happy chime when tasks get done, and a mini fanfare with the confetti. Not your thing? Tap the 🔊 button at the top (under 🌙) to mute — it remembers your choice.
 - **Scroll down** and a slim glass bar keeps the trip total and share button in reach; tap it to jump back up.
 - Little 💡 tips sit under each section, and Sipit's speech bubble reacts to what's actually happening (overdue tasks, money progress).
 - **📝 Trip notes** — a free space for meet-up time, addresses, contact numbers. Saves as you type and syncs with the cloud like everything else.

@@ -127,6 +127,8 @@
       background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
       display: grid; place-items: center;
     }
+    .topbtns { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+    #soundBtn.muted { opacity: .55; }
 
     /* ---------- Sticky glass bar ---------- */
     .stickybar {
@@ -581,7 +583,10 @@
           <div id="uwiBubble" class="bubble"></div>
         </div>
       </div>
-      <button id="themeBtn" class="theme-btn" type="button" title="Switch light / dark" aria-label="Switch light or dark mode">🌙</button>
+      <div class="topbtns">
+        <button id="themeBtn" class="theme-btn" type="button" title="Switch light / dark" aria-label="Switch light or dark mode">🌙</button>
+        <button id="soundBtn" class="theme-btn" type="button" title="Sounds on / off" aria-label="Turn sounds on or off" aria-pressed="true">🔊</button>
+      </div>
     </header>
 
     <!-- Trip switcher -->
@@ -920,7 +925,7 @@
       try { state = JSON.parse(pendingUndo.json); } catch (e) { return; }
       pendingUndo = null;
       editingExp = null; editingPerson = null; editingTodo = null; payFor = null;
-      render(); toast('Brought it back ✓');
+      play('undo'); render(); toast('Brought it back ✓');
     }
 
     /* ---------- Uwi the mascot, confetti & celebrations ---------- */
@@ -950,6 +955,92 @@
       $('uwiBubble').textContent = '🦀 ' + pool[Math.floor(Math.random() * pool.length)];
     }
     const buzz = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} };
+
+    /* ---------- Sounds: tiny built-in synth SFX, toggleable with the 🔊 button ---------- */
+    const SOUND_KEY = 'uwingUwiSound';
+    let soundOn = true;
+    try { soundOn = localStorage.getItem(SOUND_KEY) !== 'off'; } catch (e) {}
+    let audioC = null;
+    function audioCtx() {
+      try {
+        if (!audioC) audioC = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioC.state === 'suspended') audioC.resume();
+        return audioC;
+      } catch (e) { return null; }
+    }
+    function tone(o) {
+      const ctx = audioCtx(); if (!ctx) return;
+      const t0 = ctx.currentTime + (o.at || 0), dur = o.dur || .1;
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = o.type || 'sine';
+      osc.frequency.setValueAtTime(o.f0, t0);
+      if (o.f1) osc.frequency.exponentialRampToValueAtTime(o.f1, t0 + dur);
+      g.gain.setValueAtTime(.0001, t0);
+      g.gain.exponentialRampToValueAtTime(o.vol || .08, t0 + .008);
+      g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(t0); osc.stop(t0 + dur + .06);
+    }
+    let lastSfxAt = 0;
+    const claimSfx = () => { lastSfxAt = performance.now(); };
+    const SFX = {
+      hover()   { tone({ f0: 1350, f1: 1600, dur: .03, vol: .012 }); },
+      tap()     { tone({ type: 'triangle', f0: 470, f1: 330, dur: .055, vol: .05 }); },
+      tick()    { claimSfx(); tone({ f0: 950, f1: 1150, dur: .045, vol: .035 }); },
+      add()     { claimSfx(); tone({ f0: 523, dur: .08, vol: .09 }); tone({ f0: 784, dur: .13, vol: .08, at: .07 }); },
+      del()     { claimSfx(); tone({ type: 'triangle', f0: 330, f1: 140, dur: .17, vol: .07 }); },
+      coin()    { claimSfx(); tone({ type: 'square', f0: 988, dur: .06, vol: .04 }); tone({ type: 'square', f0: 1319, dur: .17, vol: .04, at: .065 }); },
+      done()    { claimSfx(); tone({ f0: 660, dur: .09, vol: .09 }); tone({ f0: 880, dur: .16, vol: .08, at: .08 }); },
+      undo()    { claimSfx(); tone({ f0: 720, f1: 430, dur: .11, vol: .06 }); tone({ f0: 560, f1: 480, dur: .09, vol: .05, at: .1 }); },
+      crab()    { claimSfx(); tone({ f0: 480, f1: 690, dur: .09, vol: .08 }); tone({ f0: 690, f1: 950, dur: .11, vol: .07, at: .1 }); },
+      fanfare() {
+        claimSfx();
+        [[523, 0], [659, .1], [784, .2], [1047, .3]].forEach((n) => tone({ type: 'triangle', f0: n[0], dur: .24, vol: .07, at: n[1] }));
+        tone({ f0: 1568, f1: 2093, dur: .3, vol: .025, at: .34 });
+      }
+    };
+    function play(name) { if (soundOn && SFX[name]) { try { SFX[name](); } catch (e) {} } }
+    /* hover blips (mouse only), plus a soft tap for any button — specific sounds "claim" the click so nothing plays twice */
+    let lastHoverEl = null, lastHoverAt = 0, lastPressAt = 0;
+    document.addEventListener('pointerdown', () => { lastPressAt = performance.now(); }, { passive: true, capture: true });
+    document.addEventListener('pointerover', (e) => {
+      if (!soundOn || e.pointerType !== 'mouse') return;
+      const el = e.target && e.target.closest ? e.target.closest('button, select, a') : null;
+      if (!el) { lastHoverEl = null; return; }
+      if (el === lastHoverEl) return;
+      lastHoverEl = el;
+      const now = performance.now();
+      if (now - lastHoverAt < 70 || now - lastPressAt < 450) return; // no blips right after a click re-renders the list
+      lastHoverAt = now;
+      play('hover');
+    }, { passive: true });
+    document.addEventListener('click', (e) => {
+      if (!soundOn) return;
+      const el = e.target && e.target.closest ? e.target.closest('button, a') : null;
+      if (!el || el.id === 'soundBtn') return;
+      if (performance.now() - lastSfxAt < 150) return;
+      play('tap');
+    });
+    document.addEventListener('change', (e) => {
+      if (!soundOn || !e.target || e.target.tagName !== 'SELECT') return;
+      if (performance.now() - lastSfxAt < 150) return;
+      play('tick');
+    });
+    function applySound(on, persist) {
+      soundOn = on;
+      if (persist !== false) { try { localStorage.setItem(SOUND_KEY, on ? 'on' : 'off'); } catch (e) {} }
+      const b = $('soundBtn');
+      b.textContent = on ? '🔊' : '🔇';
+      b.classList.toggle('muted', !on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.title = on ? 'Sounds are on — tap to mute' : 'Sounds are off — tap to turn back on';
+    }
+    $('soundBtn').addEventListener('click', () => {
+      applySound(!soundOn);
+      if (soundOn) { play('crab'); toast('Sounds on 🔊'); } else { toast('Sounds off 🔇'); }
+    });
+    applySound(soundOn, false);
+
     const actsOf = () => trip().activity || (trip().activity = []);
     function logAct(icon, text) {
       actsOf().unshift({ id: uid(), icon, text: String(text).slice(0, 140), at: new Date().toISOString() });
@@ -973,6 +1064,7 @@
         : '<div class="aline"><span>🌱</span><span>Nothing yet — money moves and finished tasks will show up here.</span></div>';
     }
     function confetti() {
+      play('fanfare');
       const EMO = ['🎉', '🎊', '⭐', '🌴', '🥥', '🦀', '💚'];
       const wrap = document.createElement('div'); wrap.className = 'confetti';
       for (let i = 0; i < 18; i++) {
@@ -1015,14 +1107,14 @@
       state.currentTripId = t.id;
       editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
       $('search').value = '';
-      render(); toast('“' + t.name + '” created — friends copied over 🎉');
+      play('add'); render(); toast('“' + t.name + '” created — friends copied over 🎉');
     }
     function renameTrip() {
       const name = (prompt('New name for this trip?', trip().name) || '').trim();
       if (!name) return;
       trip().name = name.slice(0, 40);
       logAct('✏️', 'Trip renamed to “' + trip().name + '”');
-      render(); toast('Renamed ✓');
+      play('tick'); render(); toast('Renamed ✓');
     }
     function deleteTrip() {
       const t = trip();
@@ -1032,7 +1124,7 @@
       state.currentTripId = state.trips[0].id;
       editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
       $('search').value = '';
-      render(); toast('Deleted trip: ' + t.name, true);
+      play('del'); render(); toast('Deleted trip: ' + t.name, true);
     }
 
     /* ---------- Render: summary ---------- */
@@ -1302,7 +1394,7 @@
       trip().expenses.unshift({ id: uid(), name, amount, category: selectedCat, paidBy: $('expPaidBy').value || '', note: '', date: todayISO() });
       logAct('🧾', 'Added “' + name + '” (' + fmt(amount) + ')');
       $('expName').value = ''; $('expAmount').value = ''; $('expPaidBy').value = '';
-      buzz(); render(); toast('Added: ' + name + ' ✓'); $('expName').focus();
+      buzz(); play('add'); render(); toast('Added: ' + name + ' ✓'); $('expName').focus();
     }
     function editExpense(id) { editingExp = id; editingPerson = null; payFor = null; render(); }
     function saveExpense(id) {
@@ -1313,7 +1405,7 @@
       e.category = CATS[$('eeCat').value] ? $('eeCat').value : 'Other';
       e.paidBy = $('eePaid').value;
       e.note = $('eeNote').value.trim();
-      editingExp = null; render(); toast('Saved ✓');
+      editingExp = null; play('tick'); render(); toast('Saved ✓');
     }
     function deleteExpense(id) {
       const e = trip().expenses.find((x) => x.id === id); if (!e) return;
@@ -1321,7 +1413,7 @@
       trip().expenses = trip().expenses.filter((x) => x.id !== id);
       logAct('🗑', 'Removed “' + e.name + '”');
       if (editingExp === id) editingExp = null;
-      buzz(); render(); toast('Removed ' + e.name, true);
+      buzz(); play('del'); render(); toast('Removed ' + e.name, true);
     }
     function markPaid(id, value) {
       if (!value) return;
@@ -1329,7 +1421,7 @@
       e.paidBy = value;
       const payer = value === POT ? 'shared money' : ((personById(value) || {}).name || 'someone');
       logAct('💸', '“' + e.name + '” paid by ' + payer);
-      buzz(); render();
+      buzz(); play('coin'); render();
       toast(e.paidBy === POT ? 'Paid with shared money ✓' : ((personById(value) || {}).name || 'Someone') + ' paid ✓');
     }
 
@@ -1340,14 +1432,14 @@
       trip().people.push({ id: uid(), name, payments: [] });
       logAct('👋', name + ' joined the trip');
       $('personName').value = '';
-      buzz(); render(); toast(name + ' joined the trip 🎉');
+      buzz(); play('add'); render(); toast(name + ' joined the trip 🎉');
     }
     function editPerson(id) { editingPerson = id; editingExp = null; payFor = null; render(); }
     function savePerson(id) {
       const p = personById(id); if (!p) return;
       const name = $('epName').value.trim();
       if (name) p.name = name;
-      editingPerson = null; render(); toast('Saved ✓');
+      editingPerson = null; play('tick'); render(); toast('Saved ✓');
     }
     function deletePerson(id) {
       const p = personById(id); if (!p) return;
@@ -1355,7 +1447,7 @@
       trip().expenses.forEach((e) => { if (e.paidBy === id) e.paidBy = POT; });
       todosOf().forEach((t) => { if (t.who === id) t.who = ''; });
       trip().people = trip().people.filter((x) => x.id !== id);
-      logAct('👋', p.name + ' left the trip'); buzz();
+      logAct('👋', p.name + ' left the trip'); buzz(); play('del');
       if (editingPerson === id) editingPerson = null;
       if (payFor === id) payFor = null;
       render(); toast(p.name + ' removed', true);
@@ -1369,7 +1461,7 @@
       if (amount > 0) {
         p.payments.push({ id: uid(), amount, date: todayISO() });
         logAct('💵', p.name + ' gave ' + fmt(amount));
-        buzz();
+        buzz(); play('coin');
         toast(p.name + ' gave ' + fmt(amount) + ' 💚');
       }
       payFor = null; render();
@@ -1381,7 +1473,7 @@
       snapshotForUndo();
       p.payments = p.payments.filter((x) => x.id !== payId);
       logAct('🗑', 'Removed ' + fmt(pay.amount) + ' payment from ' + p.name);
-      buzz(); render(); toast('Removed ' + fmt(pay.amount) + ' from ' + p.name, true);
+      buzz(); play('del'); render(); toast('Removed ' + fmt(pay.amount) + ' from ' + p.name, true);
     }
 
     /* ---------- To-dos ---------- */
@@ -1503,18 +1595,18 @@
       todosOf().unshift({ id: uid(), text, done: false, due: $('todoDue').value || '', who: $('todoWho').value || '', prio: selectedPrio, createdAt: new Date().toISOString(), doneAt: '' });
       logAct('📝', 'New task: ' + text);
       $('todoText').value = ''; $('todoDue').value = '';
-      buzz(); render(); toast('Task added ✓'); $('todoText').focus();
+      buzz(); play('add'); render(); toast('Task added ✓'); $('todoText').focus();
     }
     function addSuggested(i) {
       const s = TODO_IDEAS[i]; if (!s) return;
       todosOf().unshift({ id: uid(), text: s[0], done: false, due: '', who: '', prio: s[1], createdAt: new Date().toISOString(), doneAt: '' });
-      render(); toast('Task added ✓');
+      play('add'); render(); toast('Task added ✓');
     }
     function toggleTodo(id) {
       const t = todosOf().find((x) => x.id === id); if (!t) return;
       t.done = !t.done; t.doneAt = t.done ? todayISO() : '';
       logAct(t.done ? '✅' : '↩️', (t.done ? 'Done: ' : 'Reopened: ') + t.text);
-      buzz(); render();
+      buzz(); play(t.done ? 'done' : 'undo'); render();
       const c = todoCounts();
       if (t.done && c.all > 0 && c.done === c.all) { confetti(); toast('All tasks done! 🎉 Beach mode.'); }
     }
@@ -1525,20 +1617,20 @@
       t.due = $('tdDue').value || '';
       t.who = $('tdWho').value || '';
       t.prio = PRIO[$('tdPrio').value] ? $('tdPrio').value : 'med';
-      editingTodo = null; render(); toast('Saved ✓');
+      editingTodo = null; play('tick'); render(); toast('Saved ✓');
     }
     function deleteTodo(id) {
       const t = todosOf().find((x) => x.id === id); if (!t) return;
       snapshotForUndo();
       trip().todos = todosOf().filter((x) => x.id !== id);
       if (editingTodo === id) editingTodo = null;
-      render(); toast('Removed task', true);
+      play('del'); render(); toast('Removed task', true);
     }
     function clearDone() {
       if (!todosOf().some((t) => t.done)) return;
       snapshotForUndo();
       trip().todos = todosOf().filter((t) => !t.done);
-      render(); toast('Cleared finished tasks', true);
+      play('del'); render(); toast('Cleared finished tasks', true);
     }
 
     /* ---------- Cloud sync (free & optional) ---------- */
@@ -1709,7 +1801,7 @@
     }
     function copySummary() {
       const text = buildSummaryText();
-      const done = () => toast('Copied! Paste it in your group chat 💬');
+      const done = () => { play('done'); toast('Copied! Paste it in your group chat 💬'); };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
       } else { fallbackCopy(text, done); }
@@ -1717,7 +1809,7 @@
     function shareSummary() {
       const text = buildSummaryText();
       if (navigator.share) {
-        navigator.share({ title: trip().name + ' — money update', text: text }).then(() => toast('Shared! 💌')).catch(() => {});
+        navigator.share({ title: trip().name + ' — money update', text: text }).then(() => { play('done'); toast('Shared! 💌'); }).catch(() => {});
       } else {
         copySummary(); // no share sheet on this browser — copy instead
       }
@@ -1749,7 +1841,7 @@
           state = data;
           editingExp = null; editingPerson = null; editingTodo = null; payFor = null; searchText = ''; payFilter = 'all'; todoFilter = 'all';
           $('search').value = '';
-          render(); toast('Backup loaded ✓');
+          play('done'); render(); toast('Backup loaded ✓');
         } catch (e) { toast('That file is not a valid backup'); }
       };
       reader.readAsText(file);
@@ -1790,6 +1882,7 @@
     $('restoreFile').addEventListener('change', (e) => { if (e.target.files[0]) restoreBackup(e.target.files[0]); e.target.value = ''; });
     $('deleteTripBtn').addEventListener('click', deleteTrip);
     $('mascotBtn').addEventListener('click', () => {
+      play('crab');
       const btn = $('mascotBtn');
       btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle');
       setBubble();
@@ -1832,7 +1925,7 @@
       state = { trips: [blankTrip('My trip')], currentTripId: null };
       state.currentTripId = state.trips[0].id;
       editingExp = null; editingPerson = null; editingTodo = null; payFor = null;
-      render(); toast('Everything erased', true);
+      play('del'); render(); toast('Everything erased', true);
     });
 
     applyTheme(document.documentElement.classList.contains('dark'), false);
