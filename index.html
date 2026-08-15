@@ -15,6 +15,12 @@
     try {
       var savedTheme = localStorage.getItem('uwingUwiTheme');
       if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+      var g = localStorage.getItem('uwingUwiGlass') || 'on';
+      if (g !== 'off') {
+        document.documentElement.classList.add('glassy');
+        if (g === 'soft') document.documentElement.classList.add('glass-soft');
+        if (g === 'ultra') document.documentElement.classList.add('glass-ultra');
+      }
     } catch (e) {}
   </script>
   <style>
@@ -127,8 +133,89 @@
       background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-sm);
       display: grid; place-items: center;
     }
-    .topbtns { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-    #soundBtn.muted { opacity: .55; }
+    /* ---------- ✨ Glassy iPhone-style look (toggle in ⚙️ Settings) ---------- */
+    html.glassy {
+      --card: rgba(255, 255, 255, .62); --line: rgba(255, 255, 255, .8); --chipbg: rgba(255, 255, 255, .52);
+      --glass: rgba(255, 255, 255, .5);
+      --shadow: 0 14px 44px rgba(21, 40, 60, .13); --shadow-sm: 0 5px 18px rgba(21, 40, 60, .08);
+    }
+    html.glassy.dark {
+      --card: rgba(24, 38, 63, .58); --line: rgba(148, 178, 215, .22); --chipbg: rgba(42, 62, 96, .48);
+      --glass: rgba(13, 22, 39, .55);
+    }
+    html.glassy body::before {
+      content: ''; position: fixed; inset: -12%; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(38% 30% at 12% 6%, rgba(244, 113, 95, .24), transparent 68%),
+        radial-gradient(34% 28% at 88% 12%, rgba(252, 211, 77, .24), transparent 68%),
+        radial-gradient(46% 34% at 28% 96%, rgba(16, 161, 132, .22), transparent 70%),
+        radial-gradient(30% 26% at 80% 74%, rgba(56, 189, 248, .18), transparent 68%);
+    }
+    html.glassy.dark body::before { opacity: .55; }
+    html.glassy .card, html.glassy .modal, html.glassy .theme-btn, html.glassy .jumpbar button, html.glassy .trip-chip, html.glassy .toast {
+      backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+    }
+    html.glassy .hero {
+      border: 1px solid rgba(255, 255, 255, .32);
+      background: linear-gradient(135deg, rgba(14, 117, 105, .82) 0%, rgba(13, 148, 120, .74) 55%, rgba(16, 161, 132, .68) 100%);
+    }
+    html.glassy.dark .hero { background: linear-gradient(135deg, rgba(13, 79, 71, .82) 0%, rgba(13, 99, 84, .74) 55%, rgba(14, 112, 94, .68) 100%); }
+    html.glassy.glass-soft .hero { background: linear-gradient(135deg, rgba(14, 117, 105, .92) 0%, rgba(13, 148, 120, .88) 55%, rgba(16, 161, 132, .84) 100%); }
+    html.glassy.glass-soft.dark .hero { background: linear-gradient(135deg, rgba(13, 79, 71, .92) 0%, rgba(13, 99, 84, .88) 55%, rgba(14, 112, 94, .84) 100%); }
+    html.glassy.glass-ultra .hero { background: linear-gradient(135deg, rgba(14, 117, 105, .62) 0%, rgba(13, 148, 120, .54) 55%, rgba(16, 161, 132, .48) 100%); }
+    html.glassy.glass-ultra.dark .hero { background: linear-gradient(135deg, rgba(13, 79, 71, .64) 0%, rgba(13, 99, 84, .56) 55%, rgba(14, 112, 94, .5) 100%); }
+    /* toast stays readable on frosted glass */
+    html.glassy .toast { background: rgba(13, 22, 39, .82); color: #fff; border: 1px solid rgba(255, 255, 255, .16); }
+    html.glassy.dark .toast { background: rgba(255, 255, 255, .88); color: #101b28; border-color: rgba(255, 255, 255, .5); }
+    /* Soft = a light frost · Ultra = thoroughly glassy, like iPhone notifications */
+    html.glassy.glass-soft {
+      --card: rgba(255, 255, 255, .82); --line: rgba(255, 255, 255, .9); --chipbg: rgba(255, 255, 255, .68);
+      --glass: rgba(255, 255, 255, .7);
+    }
+    html.glassy.glass-soft.dark { --card: rgba(24, 38, 63, .8); --line: rgba(148, 178, 215, .24); --chipbg: rgba(42, 62, 96, .64); --glass: rgba(13, 22, 39, .72); }
+    html.glassy.glass-soft .card, html.glassy.glass-soft .modal, html.glassy.glass-soft .theme-btn, html.glassy.glass-soft .jumpbar button, html.glassy.glass-soft .trip-chip, html.glassy.glass-soft .toast {
+      backdrop-filter: blur(9px) saturate(1.2); -webkit-backdrop-filter: blur(9px) saturate(1.2);
+    }
+    html.glassy.glass-ultra {
+      --card: rgba(255, 255, 255, .38); --line: rgba(255, 255, 255, .62); --chipbg: rgba(255, 255, 255, .3);
+      --glass: rgba(255, 255, 255, .32);
+      --shadow: 0 18px 52px rgba(21, 40, 60, .16);
+    }
+    html.glassy.glass-ultra.dark { --card: rgba(24, 38, 63, .36); --line: rgba(148, 178, 215, .18); --chipbg: rgba(42, 62, 96, .3); --glass: rgba(13, 22, 39, .34); }
+    html.glassy.glass-ultra .card, html.glassy.glass-ultra .modal, html.glassy.glass-ultra .theme-btn, html.glassy.glass-ultra .jumpbar button, html.glassy.glass-ultra .trip-chip, html.glassy.glass-ultra .toast {
+      backdrop-filter: blur(38px) saturate(1.9); -webkit-backdrop-filter: blur(38px) saturate(1.9);
+    }
+    html.glassy.glass-ultra body::before { filter: saturate(1.35); }
+    .setrow.stack { flex-wrap: wrap; }
+    .miniseg { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 4px; flex-basis: 100%; margin-top: 10px; }
+    .miniseg button { flex: 1; font-size: 13px; font-weight: 800; padding: 8px 2px; border-radius: 10px; color: var(--mut); }
+    .miniseg button.on { background: #34c759; color: #fff; box-shadow: 0 2px 8px rgba(52, 199, 89, .4); }
+    .setlink.danger { color: var(--rose-ink); }
+    .setlink.danger .seticon { background: var(--rose-wash); }
+    /* springy iPhone-feel presses */
+    button { transition: transform .13s cubic-bezier(.2, .9, .3, 1.4); }
+    button:active { transform: scale(.955); }
+    /* ---------- ⚙️ Settings sheet (iOS style) ---------- */
+    .setgroup { background: var(--chipbg); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-top: 14px; }
+    .setrow, .setlink { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+    .setgroup > :last-child { border-bottom: 0; }
+    .seticon { font-size: 19px; width: 36px; height: 36px; display: grid; place-items: center; background: var(--card); border-radius: 11px; flex-shrink: 0; box-shadow: var(--shadow-sm); }
+    .setlabel { flex: 1; min-width: 0; }
+    .setlabel b { display: block; font-size: 15px; color: var(--ink-strong); }
+    .setlabel small { color: var(--mut); font-size: 12.5px; }
+    .setlink { font-weight: 800; color: var(--ink-strong); text-align: left; font-size: 15px; }
+    .setlink .chev { margin-left: auto; color: var(--faint); font-size: 20px; font-weight: 800; }
+    .sw { position: relative; width: 51px; height: 31px; border-radius: 999px; background: rgba(120, 120, 128, .34); transition: background .22s ease; flex-shrink: 0; padding: 0; }
+    .sw::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .3), 0 0 1px rgba(0, 0, 0, .12); transition: transform .22s cubic-bezier(.2, .9, .3, 1.2); }
+    .sw.on { background: #34c759; }
+    .sw.on::after { transform: translateX(20px); }
+    button.sw:active { transform: none; }
+    .mini-tasks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+    .mini-task { font-size: 12.5px; font-weight: 700; color: var(--ink); background: var(--chipbg); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; text-align: left; }
+    .mini-task.late { border-color: #f43f5e; color: #e11d48; }
+    .cashchips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .cashchip { font-size: 13px; font-weight: 800; color: var(--ink); background: var(--chipbg); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; }
+    .cashchip.settle { background: rgba(16, 185, 129, .14); border-color: rgba(16, 185, 129, .55); }
 
     /* ---------- Sticky glass bar ---------- */
     .stickybar {
@@ -448,6 +535,7 @@
     .modal {
       background: var(--card); border: 1px solid var(--line); border-radius: 26px;
       box-shadow: 0 30px 90px rgba(0, 0, 0, .35); padding: 22px 20px; width: min(94vw, 440px);
+      max-height: min(88vh, 740px); overflow-y: auto;
       animation: rise .25s cubic-bezier(.2, .9, .2, 1) both;
     }
     @keyframes rise { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
@@ -583,10 +671,7 @@
           <div id="uwiBubble" class="bubble"></div>
         </div>
       </div>
-      <div class="topbtns">
-        <button id="themeBtn" class="theme-btn" type="button" title="Switch light / dark" aria-label="Switch light or dark mode">🌙</button>
-        <button id="soundBtn" class="theme-btn" type="button" title="Sounds on / off" aria-label="Turn sounds on or off" aria-pressed="true">🔊</button>
-      </div>
+      <button id="settingsBtn" class="theme-btn" type="button" title="Settings" aria-label="Open settings">⚙️</button>
     </header>
 
     <!-- Trip switcher -->
@@ -636,8 +721,9 @@
           </div>
         </div>
         <form id="expForm" class="stack" autocomplete="off">
-          <input id="expName" class="field" placeholder="What is it? (e.g. Coke, boat ride)" required maxlength="60" />
-          <input id="expAmount" class="field" type="number" inputmode="decimal" min="0" step="any" placeholder="How much? (₱)" required />
+          <input id="expName" class="field" list="expIdeas" autocomplete="off" placeholder="What is it? (e.g. Coke, boat ride)" required maxlength="60" />
+          <datalist id="expIdeas"></datalist>
+          <input id="expAmount" class="field" type="text" inputmode="decimal" autocomplete="off" placeholder="How much? (₱ — math like 120+80 works)" required />
           <div id="catChips" class="chips" aria-label="Category"></div>
           <select id="expPaidBy" class="field" aria-label="Who paid for this?"></select>
           <button class="btn btn-primary w100" type="submit">＋ Add to the list</button>
@@ -735,17 +821,46 @@
     <footer>
       <p>Sipit v2 · made for the barkada 🌊 · saves automatically on this device</p>
       <div class="flinks">
-        <button id="cloudBtn" type="button">☁️ Cloud sync</button>
-        <button id="a2hsBtn" type="button">📲 Add to home screen</button>
-        <button id="backupBtn" type="button">Save backup</button>
-        <button id="restoreBtn" type="button">Load backup</button>
-        <button id="deleteTripBtn" type="button" class="danger">Delete this trip</button>
-        <button id="clearAllBtn" type="button" class="danger">Erase everything</button>
+        <button id="footSettings" type="button">⚙️ Settings</button>
       </div>
       <p id="cloudStatus" class="cloudline"></p>
       <input type="file" id="restoreFile" accept=".json,application/json" hidden />
     </footer>
 
+  </div>
+
+  <div id="settingsModal" class="overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal-head">
+        <svg class="mini" aria-hidden="true"><use href="#uwiCool"/></svg>
+        <h3 id="settingsTitle">Settings</h3>
+        <button id="settingsClose" class="icon-btn" type="button" aria-label="Close settings">✕</button>
+      </div>
+      <div class="setgroup" role="group" aria-label="Look and feel">
+        <div class="setrow"><span class="seticon">🌙</span><div class="setlabel"><b>Dark mode</b><small>Easy on the eyes at night</small></div><button id="swTheme" class="sw" type="button" role="switch" aria-checked="false" aria-label="Dark mode"></button></div>
+        <div class="setrow stack"><span class="seticon">✨</span><div class="setlabel"><b>Glassy look</b><small>Ultra = thoroughly frosted, like iPhone notifications</small></div>
+          <div class="miniseg" role="radiogroup" aria-label="How glassy">
+            <button id="glassOff" type="button" role="radio" aria-checked="false">Off</button>
+            <button id="glassSoft" type="button" role="radio" aria-checked="false">Soft</button>
+            <button id="glassOn" type="button" role="radio" aria-checked="true">Glassy</button>
+            <button id="glassUltra" type="button" role="radio" aria-checked="false">Ultra</button>
+          </div>
+        </div>
+        <div class="setrow"><span class="seticon">🔊</span><div class="setlabel"><b>Sounds</b><small>Blips, coin dings & fanfares</small></div><button id="swSound" class="sw" type="button" role="switch" aria-checked="true" aria-label="Sounds"></button></div>
+        <div class="setrow"><span class="seticon">📳</span><div class="setlabel"><b>Vibration</b><small>Tiny buzz on actions (phones)</small></div><button id="swBuzz" class="sw" type="button" role="switch" aria-checked="true" aria-label="Vibration"></button></div>
+      </div>
+      <div class="setgroup" role="group" aria-label="Quick actions">
+        <button id="setCloud" class="setlink" type="button"><span class="seticon">☁️</span> Cloud sync — PC + phone <span class="chev">›</span></button>
+        <button id="setA2hs" class="setlink" type="button"><span class="seticon">📲</span> Add to home screen <span class="chev">›</span></button>
+        <button id="setBackup" class="setlink" type="button"><span class="seticon">💾</span> Save backup <span class="chev">›</span></button>
+        <button id="setCsv" class="setlink" type="button"><span class="seticon">📊</span> Export CSV <span class="chev">›</span></button>
+        <button id="setRestore" class="setlink" type="button"><span class="seticon">📥</span> Load backup <span class="chev">›</span></button>
+      </div>
+      <div class="setgroup" role="group" aria-label="Careful zone">
+        <button id="setDelTrip" class="setlink danger" type="button"><span class="seticon">🗑</span> Delete this trip <span class="chev">›</span></button>
+        <button id="setEraseAll" class="setlink danger" type="button"><span class="seticon">⚠️</span> Erase everything <span class="chev">›</span></button>
+      </div>
+    </div>
   </div>
 
   <div id="cloudModal" class="overlay" hidden>
@@ -853,12 +968,13 @@
           { id: String(t.id || uid()), name: String(t.name || 'My trip').slice(0, 40), notes: String(t.notes || '').slice(0, 5000) },
           normalizeLists(t)
         ));
+        trips.forEach((t) => { if (t.name === 'Uwing Uwi Resort Trip') t.name = 'Trip'; });
         if (!trips.length) return null;
         const current = trips.some((t) => t.id === raw.currentTripId) ? raw.currentTripId : trips[0].id;
         return { trips, currentTripId: current, updatedAt: String(raw.updatedAt || '') };
       }
       if (raw && (Array.isArray(raw.people) || Array.isArray(raw.expenses))) {
-        const t = Object.assign({ id: uid(), name: 'Uwing Uwi Resort Trip' }, normalizeLists(raw));
+        const t = Object.assign({ id: uid(), name: 'Trip' }, normalizeLists(raw));
         if (!t.people.length && !t.expenses.length) return null;
         return { trips: [t], currentTripId: t.id, updatedAt: '' };
       }
@@ -935,7 +1051,7 @@
       'Tip: ＋ New trip starts fresh but keeps your friends.',
       'Tip: deleted something by mistake? Undo is in the black popup 😌',
       'Tip: tap the round circle to finish a task. So satisfying ✅',
-      'Tip: 📲 Add to home screen is at the bottom — I become an app!',
+      'Tip: ⚙️ Settings → Add to home screen — I become an app! 📲',
       'Kaya natin ’to, barkada! 💪',
       'Beach day loading… 🏖️',
       'Piso by piso, beach by beach 🌊',
@@ -948,13 +1064,19 @@
       const overdue = todosOf().filter((t) => !t.done && t.due && t.due < todayISO()).length;
       const smart = [];
       if (overdue) smart.push(overdue + ' task' + (overdue > 1 ? 's are' : ' is') + ' overdue — go go go! ⏰');
+      if (!cloud && (trip().expenses.length || trip().people.length)) smart.push('Want this on your PC AND phone? Open ⚙️ Settings → Cloud sync!');
+      let lastBk = 0; try { lastBk = Number(localStorage.getItem('uwingUwiLastBackup')) || 0; } catch (e) {}
+      if ((trip().expenses.length > 3 || collected > 0) && Date.now() - lastBk > 14 * 86400000) smart.push('No recent backup — ⚙️ Settings → Save backup takes 2 seconds 💾');
       if (total > 0 && collected >= total) smart.push('Trip is fully funded — you legends! 🎉');
       else if (total > 0 && collected / total >= .75) smart.push('So close! Only ' + fmt(total - collected) + ' to go 💪');
       else if (total > 0 && collected === 0 && trip().people.length > 1) smart.push('No money in yet — who wants to be first? 😄');
       const pool = (smart.length && Math.random() < .7) ? smart : CHEERS;
       $('uwiBubble').textContent = '🦀 ' + pool[Math.floor(Math.random() * pool.length)];
     }
-    const buzz = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} };
+    const BUZZ_KEY = 'uwingUwiBuzz';
+    let buzzOn = true;
+    try { buzzOn = localStorage.getItem(BUZZ_KEY) !== 'off'; } catch (e) {}
+    const buzz = (ms) => { try { if (buzzOn && navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} };
 
     /* ---------- Sounds: tiny built-in synth SFX, toggleable with the 🔊 button ---------- */
     const SOUND_KEY = 'uwingUwiSound';
@@ -1017,7 +1139,7 @@
     document.addEventListener('click', (e) => {
       if (!soundOn) return;
       const el = e.target && e.target.closest ? e.target.closest('button, a') : null;
-      if (!el || el.id === 'soundBtn') return;
+      if (!el || el.id === 'swSound') return;
       if (performance.now() - lastSfxAt < 150) return;
       play('tap');
     });
@@ -1029,17 +1151,134 @@
     function applySound(on, persist) {
       soundOn = on;
       if (persist !== false) { try { localStorage.setItem(SOUND_KEY, on ? 'on' : 'off'); } catch (e) {} }
-      const b = $('soundBtn');
-      b.textContent = on ? '🔊' : '🔇';
-      b.classList.toggle('muted', !on);
-      b.setAttribute('aria-pressed', on ? 'true' : 'false');
-      b.title = on ? 'Sounds are on — tap to mute' : 'Sounds are off — tap to turn back on';
+      syncSwitches();
     }
-    $('soundBtn').addEventListener('click', () => {
+    /* ---------- ⚙️ Settings sheet: switches + quick actions ---------- */
+    const GLASS_KEY = 'uwingUwiGlass';
+    const GLASS_LEVELS = ['off', 'soft', 'on', 'ultra'];
+    let glassLevel = 'on';
+    function applyGlass(level, persist) {
+      if (GLASS_LEVELS.indexOf(level) < 0) level = 'on';
+      glassLevel = level;
+      const h = document.documentElement;
+      h.classList.toggle('glassy', level !== 'off');
+      h.classList.toggle('glass-soft', level === 'soft');
+      h.classList.toggle('glass-ultra', level === 'ultra');
+      if (persist !== false) { try { localStorage.setItem(GLASS_KEY, level); } catch (e) {} }
+      syncSwitches();
+    }
+    function syncSwitches() {
+      const set = (id, on) => { const b = $(id); if (!b) return; b.classList.toggle('on', !!on); b.setAttribute('aria-checked', on ? 'true' : 'false'); };
+      set('swTheme', document.documentElement.classList.contains('dark'));
+      GLASS_LEVELS.forEach((k) => {
+        const b = $('glass' + k.charAt(0).toUpperCase() + k.slice(1));
+        if (b) { b.classList.toggle('on', glassLevel === k); b.setAttribute('aria-checked', glassLevel === k ? 'true' : 'false'); }
+      });
+      set('swSound', soundOn);
+      set('swBuzz', buzzOn);
+    }
+    $('settingsBtn').addEventListener('click', () => { syncSwitches(); $('settingsModal').hidden = false; });
+    $('settingsClose').addEventListener('click', () => { $('settingsModal').hidden = true; });
+    $('settingsModal').addEventListener('click', (e) => { if (e.target === $('settingsModal')) $('settingsModal').hidden = true; });
+    $('swTheme').addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
+    GLASS_LEVELS.forEach((lv) => {
+      $('glass' + lv.charAt(0).toUpperCase() + lv.slice(1)).addEventListener('click', () => { applyGlass(lv); play('tick'); });
+    });
+    $('swSound').addEventListener('click', () => {
       applySound(!soundOn);
       if (soundOn) { play('crab'); toast('Sounds on 🔊'); } else { toast('Sounds off 🔇'); }
     });
+    $('swBuzz').addEventListener('click', () => {
+      buzzOn = !buzzOn;
+      try { localStorage.setItem(BUZZ_KEY, buzzOn ? 'on' : 'off'); } catch (e) {}
+      if (buzzOn) buzz(20);
+      syncSwitches();
+    });
+    $('setCloud').addEventListener('click', () => { $('settingsModal').hidden = true; renderCloudModal(); $('cloudModal').hidden = false; });
+    $('setA2hs').addEventListener('click', () => { $('settingsModal').hidden = true; openA2hs(); });
+    $('setBackup').addEventListener('click', () => { $('settingsModal').hidden = true; downloadBackup(); });
+    $('setCsv').addEventListener('click', () => { $('settingsModal').hidden = true; exportCSV(); });
+    $('setRestore').addEventListener('click', () => { $('settingsModal').hidden = true; $('restoreFile').click(); });
+    $('setDelTrip').addEventListener('click', () => { $('settingsModal').hidden = true; deleteTrip(); });
+    $('setEraseAll').addEventListener('click', () => { $('settingsModal').hidden = true; eraseAll(); });
     applySound(soundOn, false);
+
+    /* ---------- Little helpers for a smoother feel ---------- */
+    // Type math right in amount boxes: 120+80, 3*250, (500+40)/2 …
+    function evalMath(v) {
+      const str = String(v || '').replace(/[₱,\s]/g, '');
+      if (!str) return 0;
+      if (!/^[\d+\-*/().]+$/.test(str)) return Number(str) || 0;
+      try { const n = Function('"use strict";return (' + str + ')')(); return isFinite(n) ? Math.max(0, n) : 0; } catch (e) { return 0; }
+    }
+    // Big numbers count up/down smoothly instead of jumping
+    const moneyPrev = {};
+    const reduceMotion = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function setMoney(id, val) {
+      const el = $(id); if (!el) return;
+      const from = moneyPrev[id];
+      moneyPrev[id] = val;
+      if (reduceMotion || from === undefined || from === val || !isFinite(from)) { el.textContent = fmt(val); return; }
+      if (el._raf) cancelAnimationFrame(el._raf);
+      const t0 = performance.now(), dur = 450;
+      const step = (t) => {
+        const k = Math.min(1, (t - t0) / dur), e2 = 1 - Math.pow(1 - k, 3);
+        el.textContent = fmt(from + (val - from) * e2);
+        el._raf = k < 1 ? requestAnimationFrame(step) : null;
+      };
+      el._raf = requestAnimationFrame(step);
+    }
+    // Item names you've used before pop up as suggestions
+    function updateIdeas() {
+      const dl = $('expIdeas'); if (!dl) return;
+      const seen = {}, out = [];
+      state.trips.forEach((t) => t.expenses.forEach((e) => {
+        const k = e.name.trim().toLowerCase();
+        if (k && !seen[k]) { seen[k] = 1; out.push(e.name.trim()); }
+      }));
+      dl.innerHTML = out.slice(0, 40).map((n) => '<option value="' + escapeHtml(n) + '"></option>').join('');
+    }
+    // Quick cash chips when adding money (tap ＋500 twice = 1000)
+    function cashChipsHTML(p) {
+      const owe = Math.round(shareEach() - personGiven(p));
+      const chips = [];
+      if (owe >= 1) chips.push('<button type="button" class="cashchip settle" onclick="fillPay(' + owe + ', true)">✓ ' + fmt(owe) + ' settles it</button>');
+      [100, 200, 500, 1000].forEach((v) => chips.push('<button type="button" class="cashchip" onclick="fillPay(' + v + ')">＋' + v + '</button>'));
+      return chips.join('');
+    }
+    function fillPay(amt, exact) {
+      const inp = $('payAmt'); if (!inp) return;
+      const cur = exact ? 0 : evalMath(inp.value);
+      inp.value = String(Math.max(0, Math.round((cur + amt) * 100) / 100));
+      play('tick'); inp.focus();
+    }
+    // Each friend's card shows what they signed up to do
+    function miniTasksHTML(p) {
+      const mine = todosOf().filter((t) => !t.done && t.who === p.id);
+      if (!mine.length) return '';
+      const today = todayISO();
+      const chips = mine.slice(0, 3).map((t) =>
+        '<button type="button" class="mini-task' + (t.due && t.due < today ? ' late' : '') + '" onclick="jump(\'secTodos\')" title="See it in the to-do list">' +
+        (t.due && t.due < today ? '⏰ ' : '🎯 ') + escapeHtml(t.text.length > 26 ? t.text.slice(0, 25) + '…' : t.text) + '</button>').join('');
+      const more = mine.length > 3 ? '<button type="button" class="mini-task" onclick="jump(\'secTodos\')">＋' + (mine.length - 3) + ' more</button>' : '';
+      return '<div class="mini-tasks">' + chips + more + '</div>';
+    }
+    // One-tap spreadsheet of the whole trip
+    function exportCSV() {
+      const t = trip();
+      const esc = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const rows = [['SPENDING — ' + t.name], ['Item', 'Category', 'Amount (PHP)', 'Paid by', 'Date']];
+      t.expenses.forEach((e) => rows.push([e.name, e.category, e.amount, e.paidBy === POT ? 'Shared money' : ((personById(e.paidBy) || {}).name || 'Not paid yet'), e.date]));
+      rows.push([], ['MONEY GIVEN'], ['Friend', 'Amount (PHP)', 'Date']);
+      t.people.forEach((p) => p.payments.forEach((x) => rows.push([p.name, x.amount, x.date])));
+      rows.push([], ['Trip total', tripTotal()], ['Collected', totalCollected()], ['Each person', Math.round(shareEach())]);
+      const csv = '\ufeff' + rows.map((r) => r.map(esc).join(',')).join('\r\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      a.download = (t.name.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'trip') + '-money.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      play('done'); toast('Spreadsheet downloaded 📊');
+    }
 
     const actsOf = () => trip().activity || (trip().activity = []);
     function logAct(icon, text) {
@@ -1080,6 +1319,7 @@
       setTimeout(() => wrap.remove(), 3600);
     }
     const fundedSeen = {};
+    const halfSeen = {};
     function setEmpty(el, text, variant) { el.innerHTML = '<svg class="empty-mascot" aria-hidden="true"><use href="#' + (variant || 'uwiSym') + '"/></svg><p>' + text + '</p>'; }
 
     /* ---------- Trip navigation ---------- */
@@ -1132,12 +1372,12 @@
       const total = tripTotal(), collected = totalCollected(), n = trip().expenses.length;
       const unpaid = trip().expenses.filter((e) => !e.paidBy);
       const pct = total > 0 ? Math.min(100, Math.round(collected / total * 100)) : 0;
-      $('tripTotal').textContent = fmt(total);
+      setMoney('tripTotal', total);
       $('tripSubline').textContent = n === 0 ? 'The list is empty.'
         : n + (n === 1 ? ' thing' : ' things') + ' on the list' + (unpaid.length ? ' · ' + unpaid.length + ' not paid yet' : ' · all paid ✓');
-      $('collected').textContent = fmt(collected);
-      $('needed').textContent = fmt(Math.max(total - collected, 0));
-      $('share').textContent = fmt(shareEach());
+      setMoney('collected', collected);
+      setMoney('needed', Math.max(total - collected, 0));
+      setMoney('share', shareEach());
       $('bar').style.width = pct + '%';
       $('pctText').textContent = total > 0 ? pct + '% of the money is in (' + trip().people.length + ' people sharing)' : 'Add things to the list to see the split.';
       $('stickyName').textContent = trip().name;
@@ -1153,6 +1393,10 @@
         setTimeout(() => toast('Fully funded! 🎉💰 Sipit is proud of you.'), 700);
       }
       else if (!funded) fundedSeen[trip().id] = false;
+      const half = total > 0 && collected >= total / 2;
+      if (halfSeen[trip().id] === undefined) halfSeen[trip().id] = half;
+      else if (half && !halfSeen[trip().id]) { halfSeen[trip().id] = true; if (!funded) { play('coin'); toast('Halfway funded! 💪 Keep it coming.'); } }
+      else if (!half) halfSeen[trip().id] = false;
     }
 
     function renderOweStrip(total, collected) {
@@ -1267,7 +1511,7 @@
       if (editingExp === e.id) {
         return '<article class="rowcard"><div class="editbox">' +
           '<input id="eeName" class="field" value="' + escapeHtml(e.name) + '" maxlength="60" placeholder="What is it?" />' +
-          '<input id="eeAmount" class="field" type="number" inputmode="decimal" min="0" step="any" value="' + (Number(e.amount) || 0) + '" placeholder="How much? (₱)" />' +
+          '<input id="eeAmount" class="field" type="text" inputmode="decimal" autocomplete="off" value="' + (Number(e.amount) || 0) + '" placeholder="How much? (₱ — 120+80 works)" />' +
           '<div class="grid2">' +
             '<select id="eeCat" class="field">' + Object.keys(CATS).map((c) => '<option' + (c === e.category ? ' selected' : '') + '>' + c + '</option>').join('') + '</select>' +
             '<select id="eePaid" class="field"><option value=""' + (!e.paidBy ? ' selected' : '') + '>🕐 Not paid yet</option>' + paidChoiceOptions(e.paidBy) + '</select>' +
@@ -1342,8 +1586,9 @@
       const direct = trip().expenses.filter((e) => e.paidBy === p.id);
       const nRecords = p.payments.length + direct.length;
       const payBox = payFor === p.id
-        ? '<form class="payform" onsubmit="return addPayment(event, \'' + p.id + '\')">' +
-            '<input id="payAmt" class="field" type="number" inputmode="decimal" min="0" step="any" placeholder="How much? (₱)" required />' +
+        ? '<div class="cashchips">' + cashChipsHTML(p) + '</div>' +
+          '<form class="payform" onsubmit="return addPayment(event, \'' + p.id + '\')">' +
+            '<input id="payAmt" class="field" type="text" inputmode="decimal" autocomplete="off" placeholder="How much? (₱ — 500+500 works)" required />' +
             '<button class="btn btn-green small" type="submit">✓ Save</button>' +
             '<button class="btn btn-ghost small" type="button" onclick="closePay()">✕</button>' +
           '</form>'
@@ -1360,6 +1605,7 @@
             '<p class="row-name">' + escapeHtml(p.name) + '</p>' +
             '<p class="given">has given <b>' + fmt(given) + '</b></p>' +
             '<div class="row-tags"><span class="tag ' + st.cls + '">' + st.text + '</span></div>' +
+            miniTasksHTML(p) +
           '</div>' +
           '<div class="row-side"><div class="row-btns">' +
             '<button type="button" class="icon-btn" title="Rename" aria-label="Rename friend" onclick="editPerson(\'' + p.id + '\')">✏️</button>' +
@@ -1377,7 +1623,7 @@
 
     /* ---------- Render all ---------- */
     function render() {
-      renderTripNav(); renderSummary(); renderChips(); renderSegTabs(); renderPaidBySelect(); renderExpenses(); renderPeople(); renderTodos(); renderActivity(); renderNotes(); renderBreakdown(); save();
+      renderTripNav(); renderSummary(); renderChips(); renderSegTabs(); renderPaidBySelect(); renderExpenses(); renderPeople(); renderTodos(); renderActivity(); renderNotes(); renderBreakdown(); updateIdeas(); save();
       if (payFor && $('payAmt')) $('payAmt').focus();
       if (editingExp && $('eeName')) $('eeName').focus();
       if (editingPerson && $('epName')) $('epName').focus();
@@ -1389,7 +1635,7 @@
     function addExpense(ev) {
       ev.preventDefault();
       const name = $('expName').value.trim();
-      const amount = Math.max(0, Number($('expAmount').value) || 0);
+      const amount = Math.max(0, evalMath($('expAmount').value));
       if (!name) return;
       trip().expenses.unshift({ id: uid(), name, amount, category: selectedCat, paidBy: $('expPaidBy').value || '', note: '', date: todayISO() });
       logAct('🧾', 'Added “' + name + '” (' + fmt(amount) + ')');
@@ -1401,7 +1647,7 @@
       const e = trip().expenses.find((x) => x.id === id); if (!e) return;
       const name = $('eeName').value.trim();
       if (name) e.name = name;
-      e.amount = Math.max(0, Number($('eeAmount').value) || 0);
+      e.amount = Math.max(0, evalMath($('eeAmount').value));
       e.category = CATS[$('eeCat').value] ? $('eeCat').value : 'Other';
       e.paidBy = $('eePaid').value;
       e.note = $('eeNote').value.trim();
@@ -1429,6 +1675,9 @@
     function addPerson(ev) {
       ev.preventDefault();
       const name = $('personName').value.trim(); if (!name) return;
+      if (trip().people.some((x) => x.name.toLowerCase() === name.toLowerCase())) {
+        play('undo'); toast('“' + name + '” is already on this trip 😅 — maybe add a nickname?'); return;
+      }
       trip().people.push({ id: uid(), name, payments: [] });
       logAct('👋', name + ' joined the trip');
       $('personName').value = '';
@@ -1457,7 +1706,7 @@
     function addPayment(ev, id) {
       ev.preventDefault();
       const p = personById(id); if (!p) return false;
-      const amount = Math.max(0, Number($('payAmt').value) || 0);
+      const amount = Math.max(0, evalMath($('payAmt').value));
       if (amount > 0) {
         p.payments.push({ id: uid(), amount, date: todayISO() });
         logAct('💵', p.name + ' gave ' + fmt(amount));
@@ -1652,7 +1901,7 @@
       if (!cloud || adopting || typeof fetch === 'undefined') return;
       setCloudStatus('☁️ syncing…');
       clearTimeout(cloudTimer);
-      cloudTimer = setTimeout(cloudPush, 1600);
+      cloudTimer = setTimeout(cloudPush, 900);
     }
     function cloudPush() {
       if (!cloud) return;
@@ -1830,6 +2079,7 @@
       link.download = 'trip-money-backup.json';
       link.click();
       URL.revokeObjectURL(link.href);
+      try { localStorage.setItem('uwingUwiLastBackup', String(Date.now())); } catch (e) {}
       toast('Backup downloaded 📥 (all trips included)');
     }
     function restoreBackup(file) {
@@ -1851,7 +2101,7 @@
     function applyTheme(dark, persist) {
       document.documentElement.classList.toggle('dark', dark);
       if (persist !== false) { try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {} }
-      $('themeBtn').textContent = dark ? '☀️' : '🌙';
+      syncSwitches();
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', dark ? '#0b1322' : '#fbf7ee');
     }
@@ -1876,18 +2126,14 @@
     $('search').addEventListener('input', () => { searchText = $('search').value; renderExpenses(); });
     $('copyBtn').addEventListener('click', copySummary);
     $('renameBtn').addEventListener('click', renameTrip);
-    $('themeBtn').addEventListener('click', () => applyTheme(!document.documentElement.classList.contains('dark')));
-    $('backupBtn').addEventListener('click', downloadBackup);
-    $('restoreBtn').addEventListener('click', () => $('restoreFile').click());
     $('restoreFile').addEventListener('change', (e) => { if (e.target.files[0]) restoreBackup(e.target.files[0]); e.target.value = ''; });
-    $('deleteTripBtn').addEventListener('click', deleteTrip);
     $('mascotBtn').addEventListener('click', () => {
       play('crab');
       const btn = $('mascotBtn');
       btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle');
       setBubble();
     });
-    $('a2hsBtn').addEventListener('click', () => {
+    function openA2hs() {
       const ua = navigator.userAgent || '';
       const isIOS = /iPhone|iPad|iPod/i.test(ua);
       const isAndroid = /Android/i.test(ua);
@@ -1895,7 +2141,7 @@
       $('stepAndroid').classList.toggle('you', isAndroid);
       $('stepDesktop').classList.toggle('you', !isIOS && !isAndroid);
       $('a2hs').hidden = false;
-    });
+    }
     $('a2hsClose').addEventListener('click', () => { $('a2hs').hidden = true; });
     $('a2hsOk').addEventListener('click', () => { $('a2hs').hidden = true; });
     $('a2hs').addEventListener('click', (e) => { if (e.target === $('a2hs')) $('a2hs').hidden = true; });
@@ -1907,6 +2153,7 @@
     }, { passive: true });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        if (!$('settingsModal').hidden) { $('settingsModal').hidden = true; return; }
         if (!$('a2hs').hidden) { $('a2hs').hidden = true; return; }
         if (!$('cloudModal').hidden) { $('cloudModal').hidden = true; return; }
         if (editingExp || editingPerson || editingTodo || payFor) closeEditors();
@@ -1914,21 +2161,27 @@
         e.preventDefault(); $('search').focus();
       }
     });
-    $('cloudBtn').addEventListener('click', () => { renderCloudModal(); $('cloudModal').hidden = false; });
     $('cloudClose').addEventListener('click', () => { $('cloudModal').hidden = true; });
     $('cloudModal').addEventListener('click', (e) => { if (e.target === $('cloudModal')) $('cloudModal').hidden = true; });
     window.addEventListener('online', () => { cloudPull(true); queueCloudPush(); });
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') cloudPull(true); });
-    $('clearAllBtn').addEventListener('click', () => {
+    window.addEventListener('focus', () => cloudPull(true));
+    setInterval(() => { // keeps PC + phone fresh while the app is open
+      if (cloud && document.visibilityState === 'visible' && navigator.onLine !== false) cloudPull(true);
+    }, 25000);
+    function eraseAll() {
       if (!confirm('Erase ALL trips, items, friends, and payments?')) return;
       snapshotForUndo();
       state = { trips: [blankTrip('My trip')], currentTripId: null };
       state.currentTripId = state.trips[0].id;
       editingExp = null; editingPerson = null; editingTodo = null; payFor = null;
       play('del'); render(); toast('Everything erased', true);
-    });
+    }
+    $('footSettings').addEventListener('click', () => { syncSwitches(); $('settingsModal').hidden = false; });
 
     applyTheme(document.documentElement.classList.contains('dark'), false);
+    let storedGlass = 'on'; try { storedGlass = localStorage.getItem(GLASS_KEY) || 'on'; } catch (e) {}
+    applyGlass(storedGlass, false);
     setBubble();
     render();
     if (cloud) { setCloudStatus('☁️ cloud sync is on'); cloudPull(true); }
@@ -1943,7 +2196,7 @@
     window.setPrio = setPrio; window.setTodoFilter = setTodoFilter; window.addSuggested = addSuggested;
     window.toggleTodo = toggleTodo; window.editTodo = editTodo; window.saveTodo = saveTodo; window.deleteTodo = deleteTodo;
     window.enableCloud = enableCloud; window.joinCloudClick = joinCloudClick; window.leaveCloud = leaveCloud; window.copyCode = copyCode;
-    window.jump = jump;
+    window.jump = jump; window.fillPay = fillPay;
   </script>
 </body>
 </html>

@@ -8,7 +8,7 @@ That little crab at the top is **Sipit** ("claw" — the claw that holds the bar
 
 ## 📲 Put it on your home screen
 
-Tap **📲 Add to home screen** at the bottom of the page and follow the steps for your phone (iPhone: Share → Add to Home Screen · Android: ⋮ menu → Add to Home screen). After that it opens like a real app, with Sipit as the icon.
+Open **⚙️ Settings** (gear at the top, or the Settings button at the bottom) → **📲 Add to home screen**, then follow the steps for your phone (iPhone: Share → Add to Home Screen · Android: ⋮ menu → Add to Home screen). After that it opens like a real app, with Sipit as the icon.
 
 ## How to open it
 
@@ -29,7 +29,7 @@ Just double-click **index.html** and it opens in your browser (Chrome, Safari, E
 Tap **Share update** on the green card and your phone's own share menu opens — send straight to Messenger, WhatsApp, wherever. Prefer paste? **Copy for group chat** still copies the same ready-made update:
 
 ```
-🏖️ UWING UWI RESORT TRIP — money update
+🏖️ TRIP — money update
 💰 Trip total: ₱7,650
 ✅ Collected: ₱3,000 (39%)
 🔴 Still needed: ₱4,650
@@ -54,8 +54,17 @@ Tap ✏️ on any item or friend to change it, or ✕ to remove it instantly —
 - **🕓 Recent activity** (near the bottom) — a little diary of who gave money, what got paid, and which tasks got done, with times. Great for "wait, who paid for the BBQ?"
 - **Jump bar** — the 🧾 👥 ✅ pills under your trips scroll you straight to any section.
 - **"Waiting on" chips** — the green card shows exactly who still needs to give money (tap to jump to them). On a brand-new trip it shows the 3 getting-started steps instead.
-- **Auto dark mode** — it follows your phone's light/dark setting until you pick one yourself with the 🌙 button.
-- **🔊 Little sounds** — soft blips when you hover and tap, a coin *ding* when money moves, a happy chime when tasks get done, and a mini fanfare with the confetti. Not your thing? Tap the 🔊 button at the top (under 🌙) to mute — it remembers your choice.
+- **⚙️ One-tap Settings** — the gear at the top (or the single Settings button at the bottom) opens an iPhone-style settings sheet: switches for **Dark mode**, **Sounds**, and **Vibration**, a slider-style picker for the **✨ Glassy look**, and every app action in one tidy place — Cloud sync, Add to home screen, Save/Load backup, Export CSV, plus a red "careful zone" for Delete this trip and Erase everything. Every choice is remembered.
+- **✨ Glassy look with 4 levels** — pick **Off / Soft / Glassy / Ultra** in ⚙️ Settings. **Ultra** is thoroughly frosted, like iPhone notifications — heavy blur, cards you can almost see through. Soft is a light touch for older phones, Off turns it all the way down. Buttons give a springy little squish when pressed whichever you pick.
+- **Auto dark mode** — it follows your phone's light/dark setting until you pick one yourself in ⚙️ Settings.
+- **🔊 Little sounds** — soft blips when you hover and tap, a coin *ding* when money moves, a happy chime when tasks get done, and a mini fanfare with the confetti. Not your thing? Flip **Sounds** off in ⚙️ Settings — it remembers your choice.
+- **🧮 Math right in the amount box** — type `120+80` or `3*250` and it computes when you save. Great for receipts.
+- **💵 Quick cash chips** — when adding money from a friend, tap **＋100 / ＋500 / ＋1000** like counting bills (tap ＋500 twice = 1,000), or the green **“₱X settles it”** chip to fill in exactly what they still owe.
+- **🎯 Friend cards show their jobs** — assign a task to someone (in ✅ Trip to-dos) and it appears right on their card, with ⏰ if it's overdue. Tap it to jump to the list.
+- **✍️ Item suggestions** — start typing an item and things you've bought on any trip pop up, so "Ice" is one tap on every outing.
+- **📊 Export CSV** (in ⚙️ Settings) — downloads the whole trip as a spreadsheet file that opens in Excel or Google Sheets.
+- **Numbers glide** — the big totals count up smoothly instead of jumping, and Sipit cheers at **50% funded** too.
+- **No duplicate friends** — adding the same name twice gets a friendly nudge instead of a mess.
 - **Scroll down** and a slim glass bar keeps the trip total and share button in reach; tap it to jump back up.
 - Little 💡 tips sit under each section, and Sipit's speech bubble reacts to what's actually happening (overdue tasks, money progress).
 - **📝 Trip notes** — a free space for meet-up time, addresses, contact numbers. Saves as you type and syncs with the cloud like everything else.
@@ -63,15 +72,21 @@ Tap ✏️ on any item or friend to change it, or ✕ to remove it instantly —
 
 ## ☁️ Cloud sync — same data on every device
 
-Tap **☁️ Cloud sync** at the bottom → **Turn on cloud sync**. You get a **trip code**. On any other phone or computer, open the tracker → ☁️ Cloud sync → paste the code → **Join**. From then on, everyone's changes flow to everyone (it checks when you open the app or come back to it, and saves a moment after you change something — the status line at the bottom tells you).
+Want the same trips on your **PC and your iPhone**? Two minutes:
+
+1. On your **PC**: open the tracker → **⚙️ Settings** → **☁️ Cloud sync** → **Turn on cloud sync** → copy the **trip code**.
+2. Send the code to yourself (Messenger, Notes, anything).
+3. On your **iPhone**: open the tracker → **⚙️ Settings** → **☁️ Cloud sync** → paste the code → **Join**.
+
+Done — from then on **everything you do syncs automatically**: items, payments, friends, to-dos, notes, even renames. It saves to the cloud moments after every change, pulls fresh data when you open or switch back to the app, and while it's open it quietly re-checks every ~25 seconds, so your PC and phone stay in step. The status line at the bottom always tells you what's happening. Share the same code with the barkada and everyone stays in sync too.
 
 Honest fine print: it uses a free community service (jsonblob.com), so treat it as convenient, not sacred — anyone who has the code can see and edit the trip, and free services can occasionally reset, so tap **Save backup** once in a while. No internet? No problem — the app keeps working offline and syncs when you're back.
 
 ## Good to know
 
 - Without cloud sync, everything saves **on the device you're using** only. With cloud sync on, all trips follow the trip code.
-- **Save backup** (bottom of the page) downloads one small file with all your trips. **Load backup** brings it back — this is also how you move everything to a new phone.
+- **Save backup** (in ⚙️ Settings) downloads one small file with all your trips. **Load backup** brings it back — this is also how you move everything to a new phone.
 - Clearing your browser's history/data can erase the tracker, so download a backup once in a while.
 - The app starts as a **blank canvas** — name your trip with the ✏️ button, then add your own items and friends. **Delete this trip** removes the trip you're viewing (Undo appears if it was a mistake). **Erase everything** wipes all trips — it's the only button that asks first.
 
-Made with ❤️ for the Uwing Uwi crew.
+Made with ❤️ for the barkada.
